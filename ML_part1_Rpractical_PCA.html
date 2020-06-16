@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="author" content="Said el Bouhaddani" />
+
+<meta name="date" content="2019-06-18" />
+
+<title>ML course - Part 1 - PCA</title>
+<!-- Material Design fonts -->
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700">
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<script src="ML_part1_Rpractical_PCA_files/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="ML_part1_Rpractical_PCA_files/bootstrap-3.3.6/css/bootstrap.min.css" rel="stylesheet" />
+<script src="ML_part1_Rpractical_PCA_files/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+<script src="ML_part1_Rpractical_PCA_files/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<script src="ML_part1_Rpractical_PCA_files/navigation-1.1/tabsets.js"></script>
+<script src="ML_part1_Rpractical_PCA_files/navigation-1.1/codefolding.js"></script>
+<link href="ML_part1_Rpractical_PCA_files/magnific-popup-1.1.0/magnific-popup.css" rel="stylesheet" />
+<script src="ML_part1_Rpractical_PCA_files/magnific-popup-1.1.0/jquery.magnific-popup.min.js"></script>
+<link href="ML_part1_Rpractical_PCA_files/bootstrap_material-0.1/bootstrap-material-design.min.css" rel="stylesheet" />
+<link href="ML_part1_Rpractical_PCA_files/bootstrap_material-0.1/ripples.min.css" rel="stylesheet" />
+<script src="ML_part1_Rpractical_PCA_files/bootstrap_material-0.1/material.min.js"></script>
+<script src="ML_part1_Rpractical_PCA_files/bootstrap_material-0.1/ripples.min.js"></script>
+<link href="ML_part1_Rpractical_PCA_files/material-0.1/material.css" rel="stylesheet" />
+<script src="ML_part1_Rpractical_PCA_files/material-0.1/material.js"></script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; background-color: #ffffff; color: #1f1c1b; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; background-color: #ffffff; color: #a0a0a0; border-right: 1px solid #a0a0a0; }
+td.sourceCode { padding-left: 5px; }
+pre, code { color: #1f1c1b; background-color: #ffffff; }
+code > span.kw { color: #1f1c1b; font-weight: bold; } /* Keyword */
+code > span.dt { color: #0057ae; } /* DataType */
+code > span.dv { color: #b08000; } /* DecVal */
+code > span.bn { color: #b08000; } /* BaseN */
+code > span.fl { color: #b08000; } /* Float */
+code > span.cn { color: #aa5500; } /* Constant */
+code > span.ch { color: #924c9d; } /* Char */
+code > span.sc { color: #3daee9; } /* SpecialChar */
+code > span.st { color: #bf0303; } /* String */
+code > span.vs { color: #bf0303; } /* VerbatimString */
+code > span.ss { color: #ff5500; } /* SpecialString */
+code > span.im { color: #ff5500; } /* Import */
+code > span.co { color: #898887; } /* Comment */
+code > span.do { color: #607880; } /* Documentation */
+code > span.an { color: #ca60ca; } /* Annotation */
+code > span.cv { color: #0095ff; } /* CommentVar */
+code > span.ot { color: #006e28; } /* Other */
+code > span.fu { color: #644a9b; } /* Function */
+code > span.va { color: #0057ae; } /* Variable */
+code > span.cf { color: #1f1c1b; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #1f1c1b; } /* Operator */
+code > span.bu { color: #644a9b; font-weight: bold; } /* BuiltIn */
+code > span.ex { color: #0095ff; font-weight: bold; } /* Extension */
+code > span.pp { color: #006e28; } /* Preprocessor */
+code > span.at { color: #0057ae; } /* Attribute */
+code > span.re { color: #0057ae; } /* RegionMarker */
+code > span.in { color: #b08000; } /* Information */
+code > span.wa { color: #bf0303; } /* Warning */
+code > span.al { color: #bf0303; font-weight: bold; } /* Alert */
+code > span.er { color: #bf0303; text-decoration: underline; } /* Error */
+code > span. { color: #1f1c1b; } /* Normal */
+</style>
+
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+</head>
+
+<body>
+
+<div class="header-panel shadow z-2">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-3">
+        <div id="header">
+    <h1 class="title">ML course - Part 1 - PCA</h1>
+                <h4 class="author">Said el Bouhaddani</h4>
+                <h4 class="date">2019-06-18</h4>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+
+<div class="container-fluid main-container">
+    <div class="row">
+      <nav class="col-xs-3 menu">
+        <div id="toc">
+        <ul>
+        <li><a href="#introduction">Introduction</a></li>
+        <li><a href="#load-real-data">Load real data</a></li>
+        <li><a href="#analysis-with-principal-components-analysis">Analysis with Principal Components Analysis</a></li>
+        <li><a href="#references">References</a></li>
+        </ul>
+        </div>
+        
+        
+        
+      </nav>
+     <div class="pages col-xs-9">
+     <div class="row">
+       <div class="col-xs-10">
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>This is a file with exercises for the ML 2019 course, given at the UMC Utrecht. The exercises are divided in two parts. This is part 1: Principal components analysis.</p>
+<div id="pca-recap" class="section level2">
+<h2>PCA recap</h2>
+<p>As discussed in the lecture, the PCA solution for finding <span class="math inline">\(w\)</span> that maximizes the variance of the projected data matrix <span class="math inline">\(Xw\)</span> is the first eigenvector of <span class="math inline">\(X^\top X\)</span>. Further directions of maximal variance are given by the subsequent eigenvectors. We typically collect all of these eigenvectors in a matrix <span class="math inline">\(W\)</span>. The projected data is given by <span class="math inline">\(T:=XW\)</span>. The matrix <span class="math inline">\(T\)</span> is a matrix of scores per column. Based on these two matrices, we can approximate <span class="math inline">\(X\)</span> by <span class="math inline">\(TW^\top\)</span> (which is nothing more than the projection of <span class="math inline">\(X\)</span> onto <span class="math inline">\(WW^\top\)</span>).</p>
+</div>
+<div id="quick-tips" class="section level2">
+<h2>Quick tips</h2>
+<ul>
+<li>To obtain the eigenvectors of a matrix <span class="math inline">\(A\)</span>, one can use <code>eigen(A)</code>. The output is a list with elements <code>values</code> and <code>vectors</code>. These elements can be accessed with the <code>$</code> key.</li>
+<li>The element <code>vectors</code> is a matrix of size <span class="math inline">\(p \times p\)</span>, this matrix can be subsetted with the <code>[</code> operator, e.g. <code>eigen(A)$vectors[,1]</code>.</li>
+<li>The scores can be obtained by multiplying <span class="math inline">\(X\)</span> and <span class="math inline">\(W\)</span>, i.e. <code>T = X %*% W</code> where <code>W = eigen(crossprod(X))$vectors</code></li>
+</ul>
+</div>
+<div id="exercises" class="section level2">
+<h2>Exercises</h2>
+<ul>
+<li>Easy exercises
+<ul>
+<li>Show that <span class="math inline">\(TW^\top\)</span> is “nothing more than” <span class="math inline">\(XWW^\top\)</span></li>
+<li>Simulate two vectors <code>x1 = rnorm(100)</code> and <code>x2 = rnorm(100)</code>, and inspect the weights of the data matrix <code>X = cbind(x1, x2)</code>.</li>
+<li>Now introduce correlation, for example by running <code>x2 = x1 + rnorm(100, sd = 0.1*sd(x1))</code>. Now run the PCA decomposition again and inspect the weights.
+<ul>
+<li>How does correlation affect the weights?</li>
+</ul></li>
+</ul></li>
+<li>More difficult exercises, you can safely skip it for now
+<ul>
+<li>Show that <span class="math inline">\(min_w ||X - X ww^\top||^2_F\)</span> s.t. <span class="math inline">\(w^\top w = 1\)</span> and <span class="math inline">\(min_w ||X^\top X - c\,ww^\top||^2_F\)</span> s.t. <span class="math inline">\(w^\top w = 1\)</span> are equivalent optimization problems as <span class="math inline">\(\max_w w^\top X^\top X w\)</span> s.t. <span class="math inline">\(w^\top w = 1\)</span></li>
+<li>What is wrong with the following optimization problem: <span class="math inline">\(\max_w w^\top X^\top X w\)</span> (with <span class="math inline">\(w\)</span> unrestricted)</li>
+<li>Formulate the optimization problem for finding the second direction <span class="math inline">\(w_2\)</span> given the first direction <span class="math inline">\(w_1\)</span></li>
+</ul></li>
+</ul>
+<div id="solutions" class="section level3">
+<h3>Solutions</h3>
+<ul>
+<li>Easy exercises
+<ul>
+<li>Note that by definition, <span class="math inline">\(T = XW\)</span>, therefore <span class="math inline">\(TW^\top = XWW^\top\)</span>.</li>
+<li>The weights should be random for each run, as it totally depends on the variances of the columns. PS don’t forget the transpose product <span class="math inline">\(X^\top X\)</span> in <code>eigen(t(X) %*% X)</code>.</li>
+<li>If the variables are correlated, the weights are much more stable. They should be around <span class="math inline">\(1/sqrt(2)\)</span>.</li>
+</ul></li>
+<li>More difficult exercises, you can safely skip it for now
+<ul>
+<li>This requires some special matrix manipulation skills. First, expand the squares to get <span class="math display">\[ ||X-Xww^\top||^2_F = \mathrm{tr}(X^\top X) - 2\mathrm{tr}(X^\top X ww^\top) +  \mathrm{tr}(ww^\top X^\top X ww^\top).\]</span> The constant term <span class="math inline">\(X^\top X\)</span> can be dropped. Within the trace, objects can be rotated to get <span class="math inline">\(-2 w^\top X^\top X w + w^\top w w^\top X^\top X w\)</span>. Due to the constraints, the final optimization problem is <span class="math display">\[ \min_w -2 w^\top X^\top X w + w^\top w w^\top X^\top X w = \max_w w^\top X^\top X w \]</span>, which is the original PCA formulation. Regarding the second formulation: <span class="math display">\[ ||X^\top X - cww^\top ||^2_f = -2c \mathrm{tr}(X^\top X ww^\top) + c^2 \mathrm{tr}(ww^\top ww^\top) \]</span>. Again, rotate within the trace and apply the constraint on <span class="math inline">\(w\)</span> yields something negatively proportional to $ w<sup>X</sup>X w $.</li>
+<li>This is discussed in the lecture. Choose <span class="math inline">\(w\)</span> is infinity and the maximum is not defined. Hence, the optimization problem does not admit a solution.</li>
+<li>It is solving <span class="math inline">\(\max_w w^\top X^\top X w\)</span> s.t. <span class="math inline">\(w^\top w = 1\)</span> and <span class="math inline">\(w^\top w_1 = 0\)</span></li>
+</ul></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="load-real-data" class="section level1">
+<h1>Load real data</h1>
+<p>We start with transcriptomic and metabolomic measurements from a Finnish population cohort, as part of the DILGOM study. The transcriptomic measurements can be found at ArrayExpress (<a href="http://www.ebi.ac.uk/arrayexpress/" class="uri">http://www.ebi.ac.uk/arrayexpress/</a>) under accession number <code>E-TABM-1036</code> (<code>E-TABM-1036.processed.1.zip</code>). The metabolite measurements are attached as supplemental material at <span class="citation">(Inouye et al. 2010)</span> (<code>msb201093-sup-0002.zip</code>). However, you can use the R code below to download them.</p>
+<div id="load-the-data" class="section level2">
+<h2>Load the data</h2>
+<p>Now we download the data and prepare it in the right format (samples as rows and genes as columns) and give the rows and columns the right names. Note that this code chunk automatically downloads and loads the transcriptomic data into memory.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="cf">if</span>(<span class="op">!</span>(<span class="st">&quot;test.tab&quot;</span> <span class="op">%in%</span><span class="st"> </span><span class="kw">list.files</span>())){
+  ## If you didn&#39;t download the expression data, 
+  ## this code will download it to the current directory (getwd())
+  temp &lt;-<span class="st"> </span><span class="kw">tempfile</span>()
+  <span class="kw">download.file</span>(
+    <span class="st">&quot;http://www.ebi.ac.uk/arrayexpress/files/E-TABM-1036/E-TABM-1036.processed.1.zip&quot;</span>,
+    temp)
+  rna0 &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="kw">unzip</span>(temp, <span class="st">&quot;test.tab&quot;</span>), <span class="dt">sep=</span><span class="st">&#39;</span><span class="ch">\t</span><span class="st">&#39;</span>)
+  <span class="kw">unlink</span>(temp); <span class="kw">rm</span>(temp)
+} <span class="cf">else</span> {
+## Or if you&#39;ve downloaded test.tab already we simply load it
+  rna0 &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;test.tab&quot;</span>, <span class="dt">sep=</span><span class="st">&#39;</span><span class="ch">\t</span><span class="st">&#39;</span>)
+}
+rna1 &lt;-<span class="st"> </span><span class="kw">t</span>(rna0[<span class="op">-</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>),<span class="op">-</span><span class="dv">1</span>])
+rna2 &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">as.numeric</span>(rna1), <span class="dt">nrow =</span> <span class="kw">nrow</span>(rna1))
+<span class="kw">dimnames</span>(rna2) &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="kw">as.character</span>(<span class="kw">unlist</span>(rna0[<span class="dv">1</span>,<span class="op">-</span><span class="dv">1</span>])),<span class="kw">unlist</span>(rna0[<span class="op">-</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>),<span class="dv">1</span>]))
+rna2 &lt;-<span class="st"> </span>rna2[<span class="kw">order</span>(<span class="kw">row.names</span>(rna2)), ] <span class="co"># Order rows according to the participant ID</span></code></pre></div>
+<p>We define a function to pick only the top <code>100*prop</code> percent of the genes that have highest expression level, intersected with the top <code>100*prop</code> percent with highest Inter Quantile Range <span class="citation">(see González et al. 2009)</span>. We apply it to our gene expression data, with <code>prop=0.75</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">filter_rna &lt;-<span class="st"> </span><span class="cf">function</span>(<span class="dt">rna=</span>rna, <span class="dt">prop =</span> <span class="fl">0.75</span>){
+  <span class="co">#calculate the maximum of gene expression per each gene and take the top</span>
+  maxGE &lt;-<span class="st"> </span><span class="kw">apply</span>(rna, <span class="dv">2</span>, max)
+  propGEmax &lt;-<span class="st"> </span><span class="kw">quantile</span>(maxGE, prop)
+  <span class="co">#take the IQR of each gene and take the top genes</span>
+  IQRGE &lt;-<span class="st"> </span><span class="kw">apply</span>(rna, <span class="dv">2</span>, IQR, <span class="dt">na.rm=</span><span class="ot">TRUE</span>)
+  propGEIQR &lt;-<span class="st"> </span><span class="kw">quantile</span>(IQRGE, prop)
+  <span class="co">#selected genes/probes are the intersection of the two previous sets</span>
+  filter2 &lt;-<span class="st"> </span>(<span class="kw">intersect</span>(<span class="kw">which</span>(maxGE<span class="op">&gt;</span><span class="st"> </span>propGEmax), <span class="kw">which</span>(IQRGE<span class="op">&gt;</span><span class="st"> </span>propGEIQR)))
+  <span class="kw">return</span>(filter2)
+}</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">rna3 &lt;-<span class="st"> </span>rna2[,<span class="kw">filter_rna</span>(rna2)]
+<span class="kw">rm</span>(rna0)
+<span class="kw">rm</span>(rna1)</code></pre></div>
+<p>We also download and load the metabolite data and process it to have samples as rows and set the columns names.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="cf">if</span>(<span class="op">!</span>(<span class="st">&quot;metabonomic_data.txt&quot;</span> <span class="op">%in%</span><span class="st"> </span><span class="kw">list.files</span>())){
+  temp &lt;-<span class="st"> </span><span class="kw">tempfile</span>()
+  <span class="kw">download.file</span>(
+    <span class="st">&quot;http://msb.embopress.org/content/msb/6/1/441/DC3/embed/inline-supplementary-material-3.zip&quot;</span>,
+    temp)
+  metab0 &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="kw">unzip</span>(temp, <span class="st">&quot;metabonomic_data.txt&quot;</span>), <span class="dt">header =</span> T)
+  <span class="kw">unlink</span>(temp); <span class="kw">rm</span>(temp)
+} <span class="cf">else</span> {
+  ## Or if you&#39;ve downloaded metabonomic_data.txt already run the next line
+  metab0 &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;metabonomic_data.txt&quot;</span>, <span class="dt">header=</span>T)
+}
+metab1 &lt;-<span class="st"> </span><span class="kw">t</span>(metab0[,<span class="op">-</span><span class="dv">1</span>])
+<span class="kw">colnames</span>(metab1) &lt;-<span class="st"> </span>metab0<span class="op">$</span>Metabolite</code></pre></div>
+</div>
+<div id="missing-data-imputation" class="section level2">
+<h2>Missing data imputation</h2>
+<p><strong>Packages needed</strong></p>
+<ul>
+<li><code>install.packages(&quot;VIM&quot;)</code></li>
+<li><code>install.packages(&quot;missForest&quot;)</code></li>
+</ul>
+<p>Note that we have missingness in the metabolite data. The functions in OmicsPLS currently do not support missing data, as this is a delicate matter. Some diagostics on the missingness in the metabolite data can be obtained. Firstly we plot a histogram of the missing data. We need the <code>VIM</code> package for this.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">VIM<span class="op">::</span><span class="kw">aggr</span>(metab1, <span class="dt">col=</span><span class="kw">c</span>(<span class="st">&#39;navyblue&#39;</span>,<span class="st">&#39;red&#39;</span>), <span class="dt">numbers=</span><span class="ot">TRUE</span>, <span class="dt">sortVars=</span><span class="ot">FALSE</span>,
+          <span class="dt">labels=</span><span class="kw">names</span>(data), <span class="dt">cex.axis=</span>.<span class="dv">7</span>, <span class="dt">gap=</span><span class="dv">3</span>, 
+          <span class="dt">ylab=</span><span class="kw">c</span>(<span class="st">&quot;Histogram of missing data&quot;</span>,<span class="st">&quot;Pattern&quot;</span>))</code></pre></div>
+<p><img src="Figs/Visualize%20missingness-1.png" width="3600" /></p>
+<p>We remove participants with 100% missing metabolite measurements, i.e. missing rows.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">NAs_in_metab1 &lt;-<span class="st"> </span><span class="kw">which</span>(<span class="kw">apply</span>(metab1, <span class="dv">1</span>, <span class="cf">function</span>(e) <span class="kw">sum</span>(<span class="kw">is.na</span>(e))<span class="op">/</span><span class="kw">length</span>(e))<span class="op">==</span><span class="dv">1</span>)
+metab2 &lt;-<span class="st"> </span>metab1[<span class="op">-</span>NAs_in_metab1,]
+rna4 &lt;-<span class="st"> </span>rna3[<span class="op">-</span>NAs_in_metab1,]</code></pre></div>
+<p>Random Forests can be used to impute missing metabolites. We use the <code>missForest</code> package to do this. It takes some time, about 8 minutes on a modest i5 laptop, as can be seen from the output.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">metab2.imp &lt;-<span class="st"> </span>missForest<span class="op">::</span><span class="kw">missForest</span>(metab2, <span class="dt">verbose =</span> T)</code></pre></div>
+<pre><code>##   missForest iteration 1 in progress...done!
+##     estimated error(s): 0.424497 
+##     difference(s): 0.02779335 
+##     time: 64.97 seconds
+## 
+##   missForest iteration 2 in progress...done!
+##     estimated error(s): 0.419336 
+##     difference(s): 0.0005857988 
+##     time: 65.77 seconds
+## 
+##   missForest iteration 3 in progress...done!
+##     estimated error(s): 0.4188716 
+##     difference(s): 0.0002902178 
+##     time: 75.33 seconds
+## 
+##   missForest iteration 4 in progress...done!
+##     estimated error(s): 0.4187581 
+##     difference(s): 0.0002496452 
+##     time: 76.32 seconds
+## 
+##   missForest iteration 5 in progress...done!
+##     estimated error(s): 0.4195644 
+##     difference(s): 0.000225137 
+##     time: 75.64 seconds
+## 
+##   missForest iteration 6 in progress...done!
+##     estimated error(s): 0.4185614 
+##     difference(s): 0.0002236399 
+##     time: 78.44 seconds
+## 
+##   missForest iteration 7 in progress...done!
+##     estimated error(s): 0.4199096 
+##     difference(s): 0.0002278719 
+##     time: 75.06 seconds</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">metab &lt;-<span class="st"> </span><span class="kw">scale</span>(metab2.imp<span class="op">$</span>ximp, <span class="dt">scale=</span>F)
+rna &lt;-<span class="st"> </span><span class="kw">scale</span>(rna4, <span class="dt">scale =</span> F)
+<span class="co"># #Run if needed:</span>
+<span class="co"># save(rna,metab,file=&quot;rna_metab.RData&quot;)</span></code></pre></div>
+<p>In the last two lines, we took one imputed instance of the metabolite data and centered the columns of the RNA and metabolite data to have zero mean. We denote them by <code>rna</code> (transcripts) and <code>metab</code> (metabolites).</p>
+</div>
+<div id="inspect-the-data-descriptives" class="section level2">
+<h2>Inspect the data: descriptives</h2>
+<p><strong>Packages needed</strong></p>
+<ul>
+<li><code>install.packages(&quot;gplots&quot;)</code></li>
+</ul>
+<p>A heatmap of metabolites, before and after imputation is plotted.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># #run if needed</span>
+<span class="co"># load(&quot;rna_metab.RData&quot;)</span>
+<span class="cf">if</span>(<span class="kw">exists</span>(<span class="st">&quot;metab1&quot;</span>)){
+  gplots<span class="op">::</span><span class="kw">heatmap.2</span>(<span class="kw">cor</span>(metab1,<span class="dt">use =</span> <span class="st">&#39;pair&#39;</span>), <span class="dt">dendrogram=</span><span class="st">&#39;none&#39;</span>, <span class="dt">Rowv=</span>F, <span class="dt">Colv=</span>F,<span class="dt">trace=</span><span class="st">&#39;n&#39;</span>,
+                  <span class="dt">breaks=</span><span class="kw">seq</span>(<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>,<span class="dt">length.out =</span> <span class="dv">25</span>), <span class="dt">col=</span>gplots<span class="op">::</span>bluered)
+}
+gplots<span class="op">::</span><span class="kw">heatmap.2</span>(<span class="kw">cor</span>(metab,<span class="dt">use =</span> <span class="st">&#39;pair&#39;</span>), <span class="dt">dendrogram=</span><span class="st">&#39;none&#39;</span>, <span class="dt">Rowv=</span>F, <span class="dt">Colv=</span>F,<span class="dt">trace=</span><span class="st">&#39;n&#39;</span>,
+                  <span class="dt">breaks=</span><span class="kw">seq</span>(<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>,<span class="dt">length.out =</span> <span class="dv">25</span>), <span class="dt">col=</span>gplots<span class="op">::</span>bluered)</code></pre></div>
+<p><img src="Figs/Heatmap%20of%20correlations-1.png" width="8cm" height="6cm" /><img src="Figs/Heatmap%20of%20correlations-2.png" width="8cm" height="6cm" /> They are almost the same, indicating that the correlation structure within metabolites hasn’t changed much.</p>
+<p>Boxplots provide a good summary to compare the distribution of the variables relative to each other. Properties such as comparable means, variances and symmetry are often good to have. To reduce the number of boxplots we filter the transcriptomic data to include genes with 95% highest expression and IQR.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">1</span>))
+<span class="kw">boxplot</span>(rna[,<span class="kw">filter_rna</span>(rna, .<span class="dv">95</span>)])
+<span class="kw">boxplot</span>(metab)
+<span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</code></pre></div>
+<p><img src="Figs/Boxplots-1.png" width="8cm" height="6cm" /> The distributions are quite symmetric and the scale is comparable across variables in each data set.</p>
+</div>
+</div>
+<div id="analysis-with-principal-components-analysis" class="section level1">
+<h1>Analysis with Principal Components Analysis</h1>
+<div id="run-pca-on-the-data" class="section level2">
+<h2>Run PCA on the data</h2>
+<p>For sake of computation time, we will introduce another way to calculate principal components. Instead of calculating eigenvectors of <span class="math inline">\(X^\top X\)</span>, we will calculate <em>right singular vectors</em> of <span class="math inline">\(X\)</span>. In R, this can be done by running <code>svd(X, nu=0, nv=1)</code>, where <code>nu</code> and <code>nv</code> represent the number of left and right singular vectors, respectively. The output is a list with three elements: <code>d</code> the <em>singular values</em>, <code>u</code> the left singular vectors, and <code>v</code> the right singular vectors and eigenvectors of <span class="math inline">\(X^\top X\)</span>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pca.rna =<span class="st"> </span><span class="kw">svd</span>(rna, <span class="dv">0</span>, <span class="dv">2</span>)
+pca.metab &lt;-<span class="st"> </span><span class="kw">svd</span>(metab, <span class="dv">0</span>, <span class="dv">2</span>)
+
+<span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
+<span class="kw">plot</span>(rna <span class="op">%*%</span><span class="st"> </span>pca.rna<span class="op">$</span>v, <span class="dt">main =</span> <span class="st">&quot;RNA PCA plot of the scores&quot;</span>,<span class="dt">xlab=</span><span class="ot">NA</span>,<span class="dt">ylab=</span><span class="ot">NA</span>)
+<span class="kw">plot</span>(metab <span class="op">%*%</span><span class="st"> </span>pca.metab<span class="op">$</span>v, <span class="dt">main =</span> <span class="st">&quot;Metabolites PCA plot of the scores&quot;</span>,<span class="dt">xlab=</span><span class="ot">NA</span>,<span class="dt">ylab=</span><span class="ot">NA</span>)</code></pre></div>
+<p><img src="Figs/PCA%20fit-1.png" width="3600" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</code></pre></div>
+<p>Now to plot the weights for the two directions. Note that the RNA dataset has around 7000 weights to plot. For the metabolite weights, we add a coloring based on the type of metabolite.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">name_col &lt;-<span class="st"> </span><span class="dv">1</span> <span class="op">+</span><span class="st"> </span><span class="kw">sapply</span>( <span class="co">#First sapply loops over column names</span>
+  <span class="dt">X =</span> <span class="kw">colnames</span>(metab),
+  <span class="dt">FUN =</span> <span class="cf">function</span>(arg){
+    <span class="kw">crossprod</span>(
+      <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>), <span class="co"># Weights to be used as categories</span>
+      <span class="kw">sapply</span>(<span class="kw">c</span>(<span class="st">&quot;VLDL&quot;</span>, <span class="st">&quot;LDL&quot;</span>, <span class="st">&quot;IDL&quot;</span>, <span class="st">&quot;HDL&quot;</span>,<span class="st">&quot;FA&quot;</span>), <span class="co"># metabolite classes</span>
+             <span class="cf">function</span>(arg2){<span class="kw">grepl</span>(arg2, arg)} <span class="co"># compare class of metabolites</span>
+      )
+    )
+    }
+  )
+name_col &lt;-<span class="st"> </span><span class="kw">factor</span>(name_col, 
+                   <span class="dt">levels =</span> <span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">4</span><span class="op">:</span><span class="dv">6</span>,<span class="dv">1</span>), 
+                   <span class="dt">labels =</span> <span class="kw">c</span>(<span class="st">&quot;VLDL&quot;</span>, <span class="st">&quot;LDL&quot;</span>, <span class="st">&quot;IDL&quot;</span>, <span class="st">&quot;HDL&quot;</span>,<span class="st">&quot;FA&quot;</span>,<span class="st">&quot;Other&quot;</span>))
+
+<span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">1</span>))
+<span class="kw">plot</span>(pca.rna<span class="op">$</span>v, <span class="dt">main=</span><span class="st">&quot;Weights for the RNA variables&quot;</span>,<span class="dt">xlab=</span><span class="ot">NA</span>,<span class="dt">ylab=</span><span class="ot">NA</span>)
+<span class="kw">abline</span>(<span class="dt">v=</span><span class="dv">0</span>, <span class="dt">h=</span><span class="dv">0</span>, <span class="dt">col=</span><span class="dv">3</span>)
+<span class="kw">plot</span>(pca.metab<span class="op">$</span>v, <span class="dt">main=</span><span class="st">&quot;Weights for the Metabolite variables&quot;</span>,
+     <span class="dt">xlab=</span><span class="ot">NA</span>,<span class="dt">ylab=</span><span class="ot">NA</span>, <span class="dt">col =</span> name_col, <span class="dt">pch =</span> <span class="kw">as.numeric</span>(name_col))
+<span class="kw">abline</span>(<span class="dt">v=</span><span class="dv">0</span>, <span class="dt">h=</span><span class="dv">0</span>, <span class="dt">col=</span><span class="dv">3</span>)
+<span class="kw">legend</span>(<span class="dt">x =</span> <span class="st">&quot;topleft&quot;</span>, <span class="dt">legend =</span> <span class="kw">levels</span>(name_col), <span class="dt">col =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">6</span>, <span class="dt">pch =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">6</span>)</code></pre></div>
+<p><img src="Figs/plot%20loadings-1.png" width="3600" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</code></pre></div>
+</div>
+<div id="exercises-1" class="section level2">
+<h2>Exercises</h2>
+<ul>
+<li>Why is it not wise to use <code>eigen</code> on <span class="math inline">\(X^\top X\)</span>, where <span class="math inline">\(X\)</span> is the <code>rna</code> dataset?</li>
+<li>Identify the most extreme expression probe with <code>identify()</code>.
+<ul>
+<li>To which gene does it map? Tip: use google.</li>
+<li>Why does it have the largest weight?</li>
+</ul></li>
+<li>What kind of clusters appear in the metabolite weights?</li>
+</ul>
+<div id="solutions-1" class="section level3">
+<h3>Solutions</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">load</span>(<span class="st">&quot;rna_metab.RData&quot;</span>)</code></pre></div>
+<ul>
+<li>Here, <code>t(rna) %*% rna</code> is a 7385 by 7385 matrix. This does probably not fit into memory. Furthermore, with <code>eigen</code> you cannot limit the number of PC’s to be calculated.</li>
+<li>Run <code>identify(pca.rna$v, labels = colnames(rna))</code> and click on the most extreme values. Then click ESC. It is the second gene in the dataset. When inspecting the boxplots of the first 10 genes, it appears that this gene has a higher variance.</li>
+<li>Roughly speaking: VLDL and HDL.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-Gonzalez2009">
+<p>González, I., S. Déjean, P. G. P. Martin, O. Gonçalves, P. Besse, and A. Baccini. 2009. “Highlighting Relationships Between Heterogeneous Biological Data Through Graphical Displays Based on Regularized Canonical Correlation Analysis.” <em>Journal of Biological Systems</em> 17 (02): 173–99. doi:<a href="https://doi.org/10.1142/S0218339009002831">10.1142/S0218339009002831</a>.</p>
+</div>
+<div id="ref-Inouye2010msb">
+<p>Inouye, Michael, Johannes Kettunen, Pasi Soininen, Kaisa Silander, Samuli Ripatti, Linda S Kumpula, Eija Hämäläinen, et al. 2010. “Metabonomic, Transcriptomic, and Genomic Variation of a Population Cohort.” <em>Molecular Systems Biology</em> 6 (1). John Wiley &amp; Sons, Ltd. doi:<a href="https://doi.org/10.1038/msb.2010.93">10.1038/msb.2010.93</a>.</p>
+</div>
+</div>
+</div>
+
+    </div>
+    <div class="col-xs-2">
+        </div>
+  </div>
+  </div>
+  </div>
+  <div class="row">
+    </div>
+  </div>
+
+<script>
+$(document).ready(function () {
+  // add bootstrap table styles to pandoc tables
+  $('tr.header').parent('thead').parent('table').addClass('table table-striped table-hover');
+
+    var images = $('.pages img');
+  images.filter(function() {
+      if ($(this).parent().attr("class") == "figure") {
+          return(false)
+      } else {
+          return(true);
+      }
+  }).wrap("<div class='figure'></div>");
+  images.addClass("image-thumb").wrap("<div class='panel-body'></div>");
+  $('.figure p.caption').wrap("<div class='panel-footer'></div>");
+  $('.figure').addClass('panel panel-default');
+  
+    $('.pages img')
+ 	  .addClass("image-lb");
+  $('.pages').magnificPopup({
+	      type:'image',
+	      closeOnContentClick: false,
+	      closeBtnInside: false,
+        delegate: 'img',
+	      gallery: {enabled: false },
+          removalDelay: 500,
+          callbacks: {
+              beforeOpen: function() {
+                // just a hack that adds mfp-anim class to markup
+                this.st.image.markup = this.st.image.markup.replace('mfp-figure', 'mfp-figure mfp-with-anim');
+              }
+          },
+          mainClass: 'mfp-move-from-top',
+	      image: {
+	        verticalFit: true,
+            titleSrc: 'alt'
+	      }
+ 	    });
+ 	
+    
+    $('#toc ul li').first().addClass("active");
+    $('#toc ul li').attr("data-target", function() {
+        return($(this).children("a").attr("href"));
+    })
+    $('body .section.level1').first().addClass("active");
+    
+    $('#toc a[href*="#"]').click(function() {
+
+      var id = $(this).attr("href");
+      if (id === "#") return;
+      if (id.substring(0, 8) === "#dyntab-") return;
+      toggle_page(id);
+
+      // Menu
+      var menu_entry = $(".menu li[data-target='"+id+"']");
+      menu_entry.addClass("active");
+      $(".menu li").not(menu_entry).removeClass("active"); 
+      
+
+    });
+
+    function toggle_page(id) {
+      $(".page").not(page).removeClass("active").hide();
+      window.page = id;
+      var page = $(window.page);
+      window.location.hash = window.page;
+      //$(this).addClass("active");
+
+      page.show();
+
+      var totop = setInterval(function () {
+        $(".pages").animate({scrollTop: 0}, 0);
+      }, 10);
+
+      setTimeout(function () {
+        page.addClass("active");
+        setTimeout(function () {
+          clearInterval(totop);
+        }, 1000);
+      }, 100);
+
+      window.dispatchEvent(new Event('resize'));
+
+    }
+
+
+    $(".menu li").click(function () {
+
+      toggle_page($(this).data("target"));
+
+      // Menu
+      if (!$(this).data("target")) return;
+      if ($(this).is(".active")) return;
+      $(".menu li").not($(this)).removeClass("active");
+      $(this).addClass("active");
+
+    });
+  
+    
+
+
+    window.page = window.location.hash;
+    if (window.page != "") {
+      $(".menu").find("li[data-target=" + window.page + "]").trigger("click");
+    }
+
+    /* init material bootstrap js */
+    $.material.init();
+});
+</script>
+
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,9 @@
+.Rproj.user
+.Rhistory
+.RData
+.Rprofile
+*.txt
+*.tab
+*.Rproj
+*.bib
+Figs/*

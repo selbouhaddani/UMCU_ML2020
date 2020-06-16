@@ -1,0 +1,293 @@
+---
+title: "ML course - Part 2 - O2PLS"
+author: "Said el Bouhaddani"
+date: '`r Sys.Date()`'
+output:
+  rmdformats::material:
+    highlight: kate
+    self_contained: no
+bibliography: references.bib
+---
+
+```{r global_options, include=FALSE}
+library(knitr)
+library(rmdformats)
+
+opts_chunk$set(fig.path='Figs/', eval=TRUE,
+               echo=TRUE, warning=TRUE, message=TRUE, dev='png', dpi=600)
+```
+
+# Introduction
+
+This is a file with exercises for the ML 2010 course. The exercises are divided in two parts. This is part 2: Two-way Orthogonal Partial Least Squares. 
+
+## The OmicsPLS R package
+
+The O2PLS method is implemented in the OmicsPLS package. 
+After installing, help is found with the `?` operator. Try to type `?OmicsPLS` for an overview of the package and `?o2m` for description of the main fitting function.
+
+## Installing and loading
+
+The easiest way to install the OmicsPLS package is to run `install.packages("OmicsPLS")`. 
+If the command did not work, check if there is a package missing. It imports the **ggplot2** and **parallel** package, so these should be installed first. If still there is an error, try to download the .tar or .zip (for Windows binaries) and install offline. These two files can be found at the CRAN website at https://cran.r-project.org/package=OmicsPLS. Also feel free to send an email with the error message you are receiving. 
+
+The OmicsPLS package is loaded by running `library(OmicsPLS)`. A message might be printed indicating that the `loadings` object is masked from `package::stats`. This basically means that whenever you type `loadings` (which is generic), you'll get the `loadings.o2m` variant. This is not a problem usually.
+
+# Background
+
+## The O2PLS method
+
+The O2PLS method is proposed in [@Trygg2003]: 
+
+$$X = TW^\top + T_{\perp}W_{\perp}^\top + E$$
+$$\underset{Data}{\underbrace{Y}} = \underset{Joint}{\underbrace{UC^\top}} + 
+    \underset{Specific}{\underbrace{U_{\perp}C_{\perp}^\top}} +
+    \underset{Noise}{\underbrace{F}}$$
+
+It decomposes the variation of two datasets into three parts:
+
+- A Joint part: $TW^\top$ for $X$ and $UC^\top$ for $Y$,
+- A Systematic/Specific/Orthogonal part: $T_\perp W_\perp^\top$ for $X$ and $U_\perp C_\perp^\top$ for $Y$,
+- A noise part: $E$ for $X$ and $F$ for $Y$.
+
+The number of columns in $T$, $U$, $W$ and $C$ are denoted by as $n$ and are referred to as the number of joint components. The number of columns in $T_\perp$ and $W_\perp$ are denoted by as $n_X$ and are referred to as the number of $X$-specific components. Analoguously for $Y$ we use $n_Y$ to denote the number of $Y$-specific components.
+The relation between $T$ and $U$ defines the relationship between $X$ and $Y$: $U = TB_T + H_{UT}$ or $T = UB_U+ H_{TU}$. Although this relationship seems asymmetric, the estimates are symmetric in $X$ and $Y$. 
+Ideally the number of components $(n, n_X, n_Y)$ are known beforehand. If not the number of components can be selected with a data-driven method, for example Cross-Validation.
+
+## Cross-Validation
+
+In cross-validation (CV) one minimizes a certain measure of error over some parameters that should be known a priori. In our case we have three parameters to determine a priori: $(n, n_X, n_Y)$. A popular measure is the prediction error $||\hat{Y} - Y||$, where $\hat{Y}$ is a prediction of $Y$. However the O2PLS method is symmetric in $X$ and $Y$, so we minimize the sum of the prediction errors: $||\hat{X} - X||+||\hat{Y} - Y||$. The idea is to fit O2PLS to our data $X$ and $Y$ and compute the prediction errors for a grid of values for $n$, $n_X$ and $n_Y$. Here $n$ should be a positive integer, and $n_X$ and $n_Y$ should be non-negative. The `best' integers are then the minimizers of the prediction error. 
+
+## Exercises
+
+- Easy exercises
+    - Write down the expression for $X^\top X$, $Y^\top Y$ and $ $X^\top Y$ in terms of $T$, $U$, etc, where $X$ and $Y$ follow the O2PLS model
+    - In some contexts, PLS and O2PLS are viewed as regression models. What is the regression function of $Y$ in terms of $X$, i.e. how is the matrix $A$ given in $Y = X A + \tilde{E}$? 
+- Difficult exercises
+    - Describe, in terms of the model, situations where  the PLS and O2PLS loadings and scores will differ
+    - Try to sketch how to simultaneuosly optimize the O2PLS weights, i.e. give a suitable objective function with constraints and propose a strategy to optimize this function
+
+### Solutions
+
+- Easy exercises
+    - First, $X^\top X = W T^\top T W^\top  + P_{Y\perp} T^\top_{Y\perp} T_{Y\perp} P_{Y\perp}^\top$. Second, $X^\top Y = W T^\top B U C^\top$. Last, $Y^\top Y = C B^\top T^\top T B C^\top  + P_{X\perp} U^\top_{X\perp} U_{X\perp} P_{X\perp}^\top$.
+    - $A = WBC^\top$
+- Difficult exercises
+    - When there is a specific component with a weak correlation between $X$ and $Y$, but a large variance, this component will be captured in the PLS joint component. This is because the product of variance and correlation is covariance, and this will be high. O2PLS will, usually, filter this away. Moreover, even if the PLS and O2PLS joint loadings are similar, the PLS scores will contain specific variation, which will dilute the true relation between $X$ and $Y$.
+    - One should optimize w.r.t. all loadings at the same time. A gradient ascent algorithm might be of use here. 
+
+
+# Main functions (to be skipped)
+
+## Brief overview
+
+The functions in OmicsPLS can be organized as follows
+
+* Cross-validating
+* Fitting
+* Summarizing \& visualizing
+
+For determining the number of components needed two Cross-Validation (CV) approaches are implemented: a standard approach and a faster alternative approach (see `?crossval_o2m` and `?crossval_o2m_adjR2`). After determining the number of components, an O2PLS fit is obtained by running `o2m` (type `?o2m` for the help page). The results can be inspected mainly by `summary` for the explained variantions and `plot` for the loadings. 
+
+## Cross-validating
+
+Two approaches for cross-validation are implemented. The standard CV is called by the following command 
+```
+crossval_o2m(X, Y, a, ax, ay, nr_folds, nr_cores = 1, stripped = TRUE, 
+    p_thresh = 3000, q_thresh = p_thresh, tol = 1e-10, max_iterations = 100)
+```
+The first six arguments are mandatory. As in the `o2m` function, `X` and `Y` represent the two data sets. 
+Instead of single integers we now have vectors of integers `a`, `ax` and `ay` that represent the number of columns. 
+The number of folds is specified by `nr_folds`. It is recommended that at least ten folds are used. Too few folds (but not less than two) result in unreliable estimates. More folds are better, but then the computational cost is increased. 
+A useful input parameter is `nr_cores`, the number of cores used, allowing for parallel computation on all platforms supported by the `parallel` package (Windows, Linux, OSM). 
+The remaining arguments are directly passed on to `o2m`. There is no reason to set `stripped=FALSE` as this will only slow down the calculations. 
+
+An alternative CV approach is implemented in the function `crossval_o2m_adjR2`. 
+```
+crossval_o2m_adjR2(X, Y, a, ax, ay, nr_folds, nr_cores = 1, stripped = TRUE, 
+    p_thresh = 3000, q_thresh = p_thresh, tol = 1e-10, max_iterations = 100)
+```
+It has exactly the same arguments as `crossval_o2m`. For this approach two folds were often enough to provide good values for `n`, `nx` and `ny`.
+
+## Fitting
+
+The fitting function is `o2m`. It has five mandatory input parameters and more optional parameters. The full syntax is given by 
+```
+o2m(X, Y, n, nx, ny, stripped = FALSE, p_thresh = 3000, 
+    q_thresh = p_thresh, tol = 1e-10, max_iterations = 100)
+```
+The matrices `X` and `Y` are the data, with rows as samples and columns as variables. The variables may be different, but each row must correspond to the same sample. 
+The integers `n`, `nx` and `ny` are the number of components. Note that they must be non-negative, moreover `n` must be positive. 
+The logical `stripped` indicates whether a stripped version of `o2m` should be used. The stripped version omits calculation and storage of the residual matrices $E$ and $F$, which are as large as $X$ and $Y$. The output of generic functions, e.g. `print`, `plot`, `summary`, remains the same.
+The integers `p_thresh` resp `q_thresh` are the minimum number of `X` resp `Y` variables for which `o2m` uses a memory-efficient NIPALS algorithm for high-dimensional data. By default `o2m` switches if both `X` and `Y` have 3000 columns. Note that the NIPALS approach is somewhat slower if one of the matrices is not high-dimensional (i.e. not many columns).
+The NIPALS approach is iterative, and `tol` (norm of the difference in loading values between two iterations) and `max_iterations` (maximum number of iterations) control termination of the algorithm. For many data sets it is sufficient to only specify the five mandatory arguments.
+
+#### High dimensional fitting
+
+In the `o2m` function the calculations of the joint components are based on the SVD of the cross-product $X^\top Y$. This can contain many elements if both matrices have many columns. For example when $p=q=10000$ the number of elements in $X^\top Y$ is $pq=10^8$ In these scenarios fitting the O2PLS method with SVD can be computationally not feasible. 
+The `o2m` function can deal with data sets with many columns, by switching to the NIPALS algorithm [@Wold1973] for calculating the joint components. The NIPALS algorithm avoids the construction and storage of the covariance matrix $X^\top Y$, moreover the NIPALS-based joint components are equal to the SVD-based PLS components if the number of iterations are large enough (up to sign). In the case that $p$ or $q$ is not too large, the NIPALS approach is somewhat slower than the SVD approach.
+
+## Summarizing
+
+To summarize the fitted variation different values can be reported by running the `summary` function on the object fitted with `o2m`. 
+```
+summary(object, digits = 3, ...)
+```
+The `object` contains the `o2m` fit, while `digits` controls the amount of digits are printed. Among others, the following is printed.
+
+- The variation of $X$ explained by the joint or specific part is calculated as $||T||^2 / ||X||^2$ and $||T_\perp||^2 / ||X||^2$. Substituting $T$ by $U$ and $X$ by $Y$ yields formulas for $Y$.
+- The variation of $Y$ predicted by $X$ is given by $||TB_T||^2 / ||X||^2$. Often it is more interesting to look at the variation of $U$ predicted by $T$: $||TB_T||^2 / ||U||^2$. If only one component is present, this ratio equals the squared correlation between $T$ and $U$. Similarly we obtain summary measures for $Y$.
+- For assessing the predictive/explanatory power of the joint part of a subset of the observed variables, we can use the squared loadings as weights, as they sum up to one. The explained variation by the joint part is $||TW_S^\top||^2/||X||^2$ and for the predictive variation relative to $U$ we have $||TBW_S^\top||^2/||U||^2$ for a subset of indices $S\subset \{1,\ldots,p\}$. For $Y$ similar formulas hold.
+
+## Visualizing
+
+The OmicsPLS package provides a function for plotting the loadings in each component. It uses on the {ggplot2} package, but a basic plot is also available if {ggplot2} is not available. The full command for plotting loadings is 
+```
+plot(x, loading_name, i, j, use_ggplot2, label, ...)
+```
+Here `x` is the only required object, namely the O2PLS fit. All other input parameters have a default value. 
+The parameter `loading_name` represents which of the four parts (X-joint, Y-joint, X-specific or Y-specific) should be plotted and should be one of `"Xjoint"`, `"Yjoint"`, `"Xorth"` or `"Yorth"`. The strings may be abbreviated to e.g. `"Xj"` (instead of `"Xjoint"`) as long as there is no ambiguity. 
+The positive integers `i` and `j` denote which components to plot against each other. For plotting component $i$ against its index, `j` can also be left unspecified. 
+The `label` parameter can be one of two, either the index number if `label = "number"` or the variable names (if present in the data) if `label = "colnames"`. Also here the strings may be abbreviated to `"n"` and `"c"` respectively. 
+Further arguments denoted by `...` will be processed by the plot function of {ggplot2}. Typically parameters like `col` (label color), `size` (label size), `alpha` (label transparancy) and/or `angle` (label angle) can be supplied here. The documentation of {ggplot2} contains much more information on this subject.
+
+
+# Real data example
+
+## Analysis with the OmicsPLS package
+
+### Fitting
+
+We select two joint, one transcript-specific and ten metabolite-specific components. We fit the O2PLS model with default values as follows.
+```{r Fit O2PLS}
+load("rna_metab.RData")
+library(OmicsPLS)
+fit = o2m(rna, metab, 2, 1, 10)
+fit
+```
+
+The total runtime of the fit was about 3 seconds. Note that univariate correlation tests would require almost one million tests to be performed, and does not take into account correlation between metabolites and genes. Also multivariate linear regression cannot deal with the large amount of variables.
+
+A summary of the results is obtained via
+```{r Summary of the fit}
+summary(fit)
+```
+The joint, orthogonal and noise variations are shown as proportions. The two joint components explains about 12\% of the transcriptomic variation and 41\% of the metabolite variation, these proportions are 17\% and 24\% for the orthogonal part. We also observe that *relative to the variation in $U$*, the variation predicted by $T$ (or equivalently $X$, transcripts) is 11.6\%. Looking relative to the variation in $Y$ (metabolites), the variation predicted by $T$ (or equivalently $X$) is $0.116*0.41$. Similar calculations can be performed for the $Y$ part.
+
+### Plotting
+
+**Packages needed**
+
+* `install.packages("magrittr")`
+* `install.packages("ggplot2")`
+* `install.packages("gridExtra")`
+* `install.packages("stringr")`
+* `install.packages("gplots")`
+* `install.packages("reshape2")`
+
+We want to see which (groups of) metabolites and transcripts tend to correlate with each other. To do this we plot the loadings. The individual loading values per component indicate the relative importance of each variable to the corresponding component. We plot the two joint loadings against each other to see which metabolites are most important for each component.
+To do this we need three packages for convenience: `magrittr` for the piping operator, `ggplot2` for plotting and `gridExtra` to put multiple ggplots in one figure. Also `stringr` will be needed to extract substrings of column names. The `reshape2` package is needed for reshaping data sets from wide format to long format.
+```{r Loadings plot, message=FALSE}
+library(magrittr)
+library(ggplot2)
+library(gridExtra)
+library(illuminaHumanv3.db)
+# Color names
+LLmodule <- c("ILMN_1690209",'ILMN_1766551', 'ILMN_1749131', 'ILMN_1688423', 
+              'ILMN_2102670', 'ILMN_1792323', 'ILMN_1899034', 'ILMN_1806721', 
+              'ILMN_1695530', 'ILMN_1726114', 'ILMN_1751625', 'ILMN_1726114', 
+              'ILMN_1753648', 'ILMN_1779043')
+LLnr <- which(colnames(rna) %in% LLmodule)
+rna_genenames <- select(illuminaHumanv3.db, 
+                        keys = colnames(rna)[LLnr], 
+                        keytype = "PROBEID", columns = "SYMBOL")[,2]
+
+name_col <- 1 + sapply( #First sapply loops over column names
+  X = colnames(metab),
+  FUN = function(arg){
+    crossprod(
+      c(1, 1, 3, 4, 5), # Weights to be used as categories
+      sapply(c("VLDL", "LDL", "IDL", "HDL","FA"), # metabolite classes
+             function(arg2){grepl(arg2, arg)} # compare class of metabolites
+      )
+    )
+    }
+  )
+name_col <- factor(name_col, 
+                   levels = c(3,2,4:6,1), 
+                   labels = c("VLDL", "LDL", "IDL", "HDL","FA","Other"))
+
+# alpmetab <- loadings(fit, "Yjoint", 1:2) %>%  # Retreive loadings
+#   abs %>% # Absolute loading values for positive weights
+#   rowSums %>% # Sum over the components
+#   sqrt + (name_col!="Other") # Take square root
+
+######### Plot loadings with OmicsPLS plot method ###
+p_metab <- plot(fit, loading_name="Yj", i=1, j=2, label="c", # Plot the loadings
+             alpha=0) + # set points to be 100% transparant
+##################### Add all layers ###
+  theme_bw() +
+  coord_fixed(ratio = 1, xlim=c(-.2,.2),ylim=c(-.2,.2)) +
+  geom_point( # Set color and size
+    aes(col=name_col, size = I(1+(name_col%in%c("VLDL","HDL"))), 
+          shape = name_col),show.legend = T) +
+  theme(legend.position="right") +
+  scale_color_discrete(name="Metabolite\nGroup",
+                       labels=c("VLDL", "LDL", "IDL", "HDL","FA","Other")) +
+  guides(size=F) + scale_shape_discrete(name="Metabolite\nGroup",
+                                labels=c("VLDL", "LDL", "IDL", "HDL","FA","Other")) +
+  scale_shape_manual(name="Metabolite\nGroup", values=c(15,3,4,17,5,6)) + 
+  labs(title = "Metabolite joint loadings",
+       x = "First Joint Loadings", y = "Second Joint Loadings") +
+  theme(plot.title = element_text(face='bold'),
+        legend.title=element_text(face='bold')) + 
+  geom_hline(yintercept = 0) + geom_vline(xintercept = 0)
+
+alprna <- loadings(fit, "Xjoint", 1:2) %>% raise_to_power(2) %>% rowSums
+alprna[-(order(alprna,decreasing=T)[1:10])] = 0
+alprna <- sign(alprna)
+toprna <- which(alprna>0)
+names_rna <- mapIds(illuminaHumanv3.db, 
+       keys = colnames(rna)[toprna], 
+       keytype = "PROBEID", 
+       column = "SYMBOL",
+       multiVals = 'first')
+names_rna[which(is.na(names_rna))] <- "?"
+######### Plot loadings with OmicsPLS plot method ###
+p_rna <- ggplot(data.frame(x = fit$W.[, 1], y = fit$W.[, 2]), 
+                aes(x = x, y = y),
+                alpha = alprna,
+                aes(label = NA)) +
+    ##################### Add all layers ###
+  theme_bw() +
+  coord_fixed(.8, c(-.15,.15),c(-.15,.15)) +
+  geom_point(alpha = 0.5, col = 'grey') +
+  geom_point(data = data.frame(x=fit$W.[LLnr,1],y=fit$W.[LLnr,2]),
+             shape = 2, col = 2, size = 2) + 
+  geom_text(data = data.frame(x=fit$W.[toprna,1],y=fit$W.[toprna,2]),
+            hjust = rep(c(1, 0), length.out = length(toprna)),
+            aes(label = names_rna)) + 
+  labs(title = "Transcript joint loadings",
+       x = "First Joint Loadings", y = "Second Joint Loadings") +
+  theme(plot.title = element_text(face='bold')) + 
+  geom_hline(yintercept = 0) + geom_vline(xintercept = 0)
+
+## Finally plot both plots in one figure.
+grid.arrange(p_metab, p_rna, ncol=2)
+```
+<!-- The genes with highest absolute loading values are most related with the metabolites having highest absolute loading values on the respective axes. It can be seen that especially VLDL metabolites cluster together in both axes, indicating that are correlated within both joint components. Moreover in the second component they tend to be negatively correlated to HDL metabolites. The VLDL metabolites are most correlated with expression of the *HDC* gene in the first component. In the second component the VLDL and HDL metabolites are most correlated with expression of genes involved in defense response and inflammation (e.g. *FCER1A*, *HDC* and *DEFA1*). -->
+
+## Exercises
+
+- Describe in one paragraph the results of the O2PLS analysis performed on the `rna` and `metab` datasets. Think about
+    - Top genes and their functionality (use google)
+    - Top metabolite clusters
+    - Which genes and clusters are related in which component
+
+
+### Solutions
+
+- The first component is interpreted as the VLDL component. The second component is more or less the HDL vs VLDL component. The corresponding genes in the second component seem to be involved in the immune system, especially HLA-DRB5 and DEFA1. This indicates that HDL vs VLDL concentrations are linked to immunology.
+
+
+# References

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="author" content="Said el Bouhaddani" />
+
+<meta name="date" content="2019-10-31" />
+
+<title>ML course - Part 2 - O2PLS</title>
+<!-- Material Design fonts -->
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700">
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<script src="ML_part2_Rpractical_O2PLS_files/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="ML_part2_Rpractical_O2PLS_files/bootstrap-3.3.6/css/bootstrap.min.css" rel="stylesheet" />
+<script src="ML_part2_Rpractical_O2PLS_files/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+<script src="ML_part2_Rpractical_O2PLS_files/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<script src="ML_part2_Rpractical_O2PLS_files/navigation-1.1/tabsets.js"></script>
+<script src="ML_part2_Rpractical_O2PLS_files/navigation-1.1/codefolding.js"></script>
+<link href="ML_part2_Rpractical_O2PLS_files/magnific-popup-1.1.0/magnific-popup.css" rel="stylesheet" />
+<script src="ML_part2_Rpractical_O2PLS_files/magnific-popup-1.1.0/jquery.magnific-popup.min.js"></script>
+<link href="ML_part2_Rpractical_O2PLS_files/bootstrap_material-0.1/bootstrap-material-design.min.css" rel="stylesheet" />
+<link href="ML_part2_Rpractical_O2PLS_files/bootstrap_material-0.1/ripples.min.css" rel="stylesheet" />
+<script src="ML_part2_Rpractical_O2PLS_files/bootstrap_material-0.1/material.min.js"></script>
+<script src="ML_part2_Rpractical_O2PLS_files/bootstrap_material-0.1/ripples.min.js"></script>
+<link href="ML_part2_Rpractical_O2PLS_files/material-0.1/material.css" rel="stylesheet" />
+<script src="ML_part2_Rpractical_O2PLS_files/material-0.1/material.js"></script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; background-color: #ffffff; color: #1f1c1b; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; background-color: #ffffff; color: #a0a0a0; border-right: 1px solid #a0a0a0; }
+td.sourceCode { padding-left: 5px; }
+pre, code { color: #1f1c1b; background-color: #ffffff; }
+code > span.kw { color: #1f1c1b; font-weight: bold; } /* Keyword */
+code > span.dt { color: #0057ae; } /* DataType */
+code > span.dv { color: #b08000; } /* DecVal */
+code > span.bn { color: #b08000; } /* BaseN */
+code > span.fl { color: #b08000; } /* Float */
+code > span.cn { color: #aa5500; } /* Constant */
+code > span.ch { color: #924c9d; } /* Char */
+code > span.sc { color: #3daee9; } /* SpecialChar */
+code > span.st { color: #bf0303; } /* String */
+code > span.vs { color: #bf0303; } /* VerbatimString */
+code > span.ss { color: #ff5500; } /* SpecialString */
+code > span.im { color: #ff5500; } /* Import */
+code > span.co { color: #898887; } /* Comment */
+code > span.do { color: #607880; } /* Documentation */
+code > span.an { color: #ca60ca; } /* Annotation */
+code > span.cv { color: #0095ff; } /* CommentVar */
+code > span.ot { color: #006e28; } /* Other */
+code > span.fu { color: #644a9b; } /* Function */
+code > span.va { color: #0057ae; } /* Variable */
+code > span.cf { color: #1f1c1b; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #1f1c1b; } /* Operator */
+code > span.bu { color: #644a9b; font-weight: bold; } /* BuiltIn */
+code > span.ex { color: #0095ff; font-weight: bold; } /* Extension */
+code > span.pp { color: #006e28; } /* Preprocessor */
+code > span.at { color: #0057ae; } /* Attribute */
+code > span.re { color: #0057ae; } /* RegionMarker */
+code > span.in { color: #b08000; } /* Information */
+code > span.wa { color: #bf0303; } /* Warning */
+code > span.al { color: #bf0303; font-weight: bold; } /* Alert */
+code > span.er { color: #bf0303; text-decoration: underline; } /* Error */
+code > span. { color: #1f1c1b; } /* Normal */
+</style>
+
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+</head>
+
+<body>
+
+<div class="header-panel shadow z-2">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-3">
+        <div id="header">
+    <h1 class="title">ML course - Part 2 - O2PLS</h1>
+                <h4 class="author">Said el Bouhaddani</h4>
+                <h4 class="date">2019-10-31</h4>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+
+<div class="container-fluid main-container">
+    <div class="row">
+      <nav class="col-xs-3 menu">
+        <div id="toc">
+        <ul>
+        <li><a href="#introduction">Introduction</a></li>
+        <li><a href="#background">Background</a></li>
+        <li><a href="#main-functions-to-be-skipped">Main functions (to be skipped)</a></li>
+        <li><a href="#real-data-example">Real data example</a></li>
+        <li><a href="#references">References</a></li>
+        </ul>
+        </div>
+        
+        
+        
+      </nav>
+     <div class="pages col-xs-9">
+     <div class="row">
+       <div class="col-xs-10">
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>This is a file with exercises for the ML 2019 course, given at the UMC Utrecht. The exercises are divided in two parts. This is part 2: Two-way Orthogonal Partial Least Squares.</p>
+<div id="the-omicspls-r-package" class="section level2">
+<h2>The OmicsPLS R package</h2>
+<p>The O2PLS method is implemented in the OmicsPLS package. After installing, help is found with the <code>?</code> operator. Try to type <code>?OmicsPLS</code> for an overview of the package and <code>?o2m</code> for description of the main fitting function.</p>
+</div>
+<div id="installing-and-loading" class="section level2">
+<h2>Installing and loading</h2>
+<p>The easiest way to install the OmicsPLS package is to run <code>install.packages(&quot;OmicsPLS&quot;)</code>. If the command did not work, check if there is a package missing. It imports the <strong>ggplot2</strong> and <strong>parallel</strong> package, so these should be installed first. If still there is an error, try to download the .tar or .zip (for Windows binaries) and install offline. These two files can be found at the CRAN website at <a href="https://cran.r-project.org/package=OmicsPLS" class="uri">https://cran.r-project.org/package=OmicsPLS</a>. Also feel free to send an email with the error message you are receiving.</p>
+<p>The OmicsPLS package is loaded by running <code>library(OmicsPLS)</code>. A message might be printed indicating that the <code>loadings</code> object is masked from <code>package::stats</code>. This basically means that whenever you type <code>loadings</code> (which is generic), you’ll get the <code>loadings.o2m</code> variant. This is not a problem usually.</p>
+</div>
+</div>
+<div id="background" class="section level1">
+<h1>Background</h1>
+<div id="the-o2pls-method" class="section level2">
+<h2>The O2PLS method</h2>
+<p>The O2PLS method is proposed in <span class="citation">(Trygg and Wold 2003)</span>:</p>
+<p><span class="math display">\[X = TW^\top + T_{\perp}W_{\perp}^\top + E\]</span> <span class="math display">\[\underset{Data}{\underbrace{Y}} = \underset{Joint}{\underbrace{UC^\top}} + 
+    \underset{Specific}{\underbrace{U_{\perp}C_{\perp}^\top}} +
+    \underset{Noise}{\underbrace{F}}\]</span></p>
+<p>It decomposes the variation of two datasets into three parts:</p>
+<ul>
+<li>A Joint part: <span class="math inline">\(TW^\top\)</span> for <span class="math inline">\(X\)</span> and <span class="math inline">\(UC^\top\)</span> for <span class="math inline">\(Y\)</span>,</li>
+<li>A Systematic/Specific/Orthogonal part: <span class="math inline">\(T_\perp W_\perp^\top\)</span> for <span class="math inline">\(X\)</span> and <span class="math inline">\(U_\perp C_\perp^\top\)</span> for <span class="math inline">\(Y\)</span>,</li>
+<li>A noise part: <span class="math inline">\(E\)</span> for <span class="math inline">\(X\)</span> and <span class="math inline">\(F\)</span> for <span class="math inline">\(Y\)</span>.</li>
+</ul>
+<p>The number of columns in <span class="math inline">\(T\)</span>, <span class="math inline">\(U\)</span>, <span class="math inline">\(W\)</span> and <span class="math inline">\(C\)</span> are denoted by as <span class="math inline">\(n\)</span> and are referred to as the number of joint components. The number of columns in <span class="math inline">\(T_\perp\)</span> and <span class="math inline">\(W_\perp\)</span> are denoted by as <span class="math inline">\(n_X\)</span> and are referred to as the number of <span class="math inline">\(X\)</span>-specific components. Analoguously for <span class="math inline">\(Y\)</span> we use <span class="math inline">\(n_Y\)</span> to denote the number of <span class="math inline">\(Y\)</span>-specific components. The relation between <span class="math inline">\(T\)</span> and <span class="math inline">\(U\)</span> defines the relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>: <span class="math inline">\(U = TB_T + H_{UT}\)</span> or <span class="math inline">\(T = UB_U+ H_{TU}\)</span>. Although this relationship seems asymmetric, the estimates are symmetric in <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>. Ideally the number of components <span class="math inline">\((n, n_X, n_Y)\)</span> are known beforehand. If not the number of components can be selected with a data-driven method, for example Cross-Validation.</p>
+</div>
+<div id="cross-validation" class="section level2">
+<h2>Cross-Validation</h2>
+<p>In cross-validation (CV) one minimizes a certain measure of error over some parameters that should be known a priori. In our case we have three parameters to determine a priori: <span class="math inline">\((n, n_X, n_Y)\)</span>. A popular measure is the prediction error <span class="math inline">\(||\hat{Y} - Y||\)</span>, where <span class="math inline">\(\hat{Y}\)</span> is a prediction of <span class="math inline">\(Y\)</span>. However the O2PLS method is symmetric in <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, so we minimize the sum of the prediction errors: <span class="math inline">\(||\hat{X} - X||+||\hat{Y} - Y||\)</span>. The idea is to fit O2PLS to our data <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> and compute the prediction errors for a grid of values for <span class="math inline">\(n\)</span>, <span class="math inline">\(n_X\)</span> and <span class="math inline">\(n_Y\)</span>. Here <span class="math inline">\(n\)</span> should be a positive integer, and <span class="math inline">\(n_X\)</span> and <span class="math inline">\(n_Y\)</span> should be non-negative. The `best’ integers are then the minimizers of the prediction error.</p>
+</div>
+<div id="exercises" class="section level2">
+<h2>Exercises</h2>
+<ul>
+<li>Easy exercises
+<ul>
+<li>Write down the expression for <span class="math inline">\(X^\top X\)</span>, <span class="math inline">\(Y^\top Y\)</span> and $ <span class="math inline">\(X^\top Y\)</span> in terms of <span class="math inline">\(T\)</span>, <span class="math inline">\(U\)</span>, etc, where <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> follow the O2PLS model</li>
+<li>In some contexts, PLS and O2PLS are viewed as regression models. What is the regression function of <span class="math inline">\(Y\)</span> in terms of <span class="math inline">\(X\)</span>, i.e. how is the matrix <span class="math inline">\(A\)</span> given in <span class="math inline">\(Y = X A + \tilde{E}\)</span>?</li>
+</ul></li>
+<li>Difficult exercises
+<ul>
+<li>Describe, in terms of the model, situations where the PLS and O2PLS loadings and scores will differ</li>
+<li>Try to sketch how to simultaneuosly optimize the O2PLS weights, i.e. give a suitable objective function with constraints and propose a strategy to optimize this function</li>
+</ul></li>
+</ul>
+<div id="solutions" class="section level3">
+<h3>Solutions</h3>
+<ul>
+<li>Easy exercises
+<ul>
+<li>First, <span class="math inline">\(X^\top X = W T^\top T W^\top + P_{Y\perp} T^\top_{Y\perp} T_{Y\perp} P_{Y\perp}^\top\)</span>. Second, <span class="math inline">\(X^\top Y = W T^\top B U C^\top\)</span>. Last, <span class="math inline">\(Y^\top Y = C B^\top T^\top T B C^\top + P_{X\perp} U^\top_{X\perp} U_{X\perp} P_{X\perp}^\top\)</span>.</li>
+<li><span class="math inline">\(A = WBC^\top\)</span></li>
+</ul></li>
+<li>Difficult exercises
+<ul>
+<li>When there is a specific component with a weak correlation between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, but a large variance, this component will be captured in the PLS joint component. This is because the product of variance and correlation is covariance, and this will be high. O2PLS will, usually, filter this away. Moreover, even if the PLS and O2PLS joint loadings are similar, the PLS scores will contain specific variation, which will dilute the true relation between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>.</li>
+<li>One should optimize w.r.t. all loadings at the same time. A gradient ascent algorithm might be of use here.</li>
+</ul></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="main-functions-to-be-skipped" class="section level1">
+<h1>Main functions (to be skipped)</h1>
+<div id="brief-overview" class="section level2">
+<h2>Brief overview</h2>
+<p>The functions in OmicsPLS can be organized as follows</p>
+<ul>
+<li>Cross-validating</li>
+<li>Fitting</li>
+<li>Summarizing &amp; visualizing</li>
+</ul>
+<p>For determining the number of components needed two Cross-Validation (CV) approaches are implemented: a standard approach and a faster alternative approach (see <code>?crossval_o2m</code> and <code>?crossval_o2m_adjR2</code>). After determining the number of components, an O2PLS fit is obtained by running <code>o2m</code> (type <code>?o2m</code> for the help page). The results can be inspected mainly by <code>summary</code> for the explained variantions and <code>plot</code> for the loadings.</p>
+</div>
+<div id="cross-validating" class="section level2">
+<h2>Cross-validating</h2>
+<p>Two approaches for cross-validation are implemented. The standard CV is called by the following command</p>
+<pre><code>crossval_o2m(X, Y, a, ax, ay, nr_folds, nr_cores = 1, stripped = TRUE, 
+    p_thresh = 3000, q_thresh = p_thresh, tol = 1e-10, max_iterations = 100)</code></pre>
+<p>The first six arguments are mandatory. As in the <code>o2m</code> function, <code>X</code> and <code>Y</code> represent the two data sets. Instead of single integers we now have vectors of integers <code>a</code>, <code>ax</code> and <code>ay</code> that represent the number of columns. The number of folds is specified by <code>nr_folds</code>. It is recommended that at least ten folds are used. Too few folds (but not less than two) result in unreliable estimates. More folds are better, but then the computational cost is increased. A useful input parameter is <code>nr_cores</code>, the number of cores used, allowing for parallel computation on all platforms supported by the <code>parallel</code> package (Windows, Linux, OSM). The remaining arguments are directly passed on to <code>o2m</code>. There is no reason to set <code>stripped=FALSE</code> as this will only slow down the calculations.</p>
+<p>An alternative CV approach is implemented in the function <code>crossval_o2m_adjR2</code>.</p>
+<pre><code>crossval_o2m_adjR2(X, Y, a, ax, ay, nr_folds, nr_cores = 1, stripped = TRUE, 
+    p_thresh = 3000, q_thresh = p_thresh, tol = 1e-10, max_iterations = 100)</code></pre>
+<p>It has exactly the same arguments as <code>crossval_o2m</code>. For this approach two folds were often enough to provide good values for <code>n</code>, <code>nx</code> and <code>ny</code>.</p>
+</div>
+<div id="fitting" class="section level2">
+<h2>Fitting</h2>
+<p>The fitting function is <code>o2m</code>. It has five mandatory input parameters and more optional parameters. The full syntax is given by</p>
+<pre><code>o2m(X, Y, n, nx, ny, stripped = FALSE, p_thresh = 3000, 
+    q_thresh = p_thresh, tol = 1e-10, max_iterations = 100)</code></pre>
+<p>The matrices <code>X</code> and <code>Y</code> are the data, with rows as samples and columns as variables. The variables may be different, but each row must correspond to the same sample. The integers <code>n</code>, <code>nx</code> and <code>ny</code> are the number of components. Note that they must be non-negative, moreover <code>n</code> must be positive. The logical <code>stripped</code> indicates whether a stripped version of <code>o2m</code> should be used. The stripped version omits calculation and storage of the residual matrices <span class="math inline">\(E\)</span> and <span class="math inline">\(F\)</span>, which are as large as <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>. The output of generic functions, e.g. <code>print</code>, <code>plot</code>, <code>summary</code>, remains the same. The integers <code>p_thresh</code> resp <code>q_thresh</code> are the minimum number of <code>X</code> resp <code>Y</code> variables for which <code>o2m</code> uses a memory-efficient NIPALS algorithm for high-dimensional data. By default <code>o2m</code> switches if both <code>X</code> and <code>Y</code> have 3000 columns. Note that the NIPALS approach is somewhat slower if one of the matrices is not high-dimensional (i.e. not many columns). The NIPALS approach is iterative, and <code>tol</code> (norm of the difference in loading values between two iterations) and <code>max_iterations</code> (maximum number of iterations) control termination of the algorithm. For many data sets it is sufficient to only specify the five mandatory arguments.</p>
+<div id="high-dimensional-fitting" class="section level4">
+<h4>High dimensional fitting</h4>
+<p>In the <code>o2m</code> function the calculations of the joint components are based on the SVD of the cross-product <span class="math inline">\(X^\top Y\)</span>. This can contain many elements if both matrices have many columns. For example when <span class="math inline">\(p=q=10000\)</span> the number of elements in <span class="math inline">\(X^\top Y\)</span> is <span class="math inline">\(pq=10^8\)</span> In these scenarios fitting the O2PLS method with SVD can be computationally not feasible. The <code>o2m</code> function can deal with data sets with many columns, by switching to the NIPALS algorithm <span class="citation">(H. Wold 1973)</span> for calculating the joint components. The NIPALS algorithm avoids the construction and storage of the covariance matrix <span class="math inline">\(X^\top Y\)</span>, moreover the NIPALS-based joint components are equal to the SVD-based PLS components if the number of iterations are large enough (up to sign). In the case that <span class="math inline">\(p\)</span> or <span class="math inline">\(q\)</span> is not too large, the NIPALS approach is somewhat slower than the SVD approach.</p>
+</div>
+</div>
+<div id="summarizing" class="section level2">
+<h2>Summarizing</h2>
+<p>To summarize the fitted variation different values can be reported by running the <code>summary</code> function on the object fitted with <code>o2m</code>.</p>
+<pre><code>summary(object, digits = 3, ...)</code></pre>
+<p>The <code>object</code> contains the <code>o2m</code> fit, while <code>digits</code> controls the amount of digits are printed. Among others, the following is printed.</p>
+<ul>
+<li>The variation of <span class="math inline">\(X\)</span> explained by the joint or specific part is calculated as <span class="math inline">\(||T||^2 / ||X||^2\)</span> and <span class="math inline">\(||T_\perp||^2 / ||X||^2\)</span>. Substituting <span class="math inline">\(T\)</span> by <span class="math inline">\(U\)</span> and <span class="math inline">\(X\)</span> by <span class="math inline">\(Y\)</span> yields formulas for <span class="math inline">\(Y\)</span>.</li>
+<li>The variation of <span class="math inline">\(Y\)</span> predicted by <span class="math inline">\(X\)</span> is given by <span class="math inline">\(||TB_T||^2 / ||X||^2\)</span>. Often it is more interesting to look at the variation of <span class="math inline">\(U\)</span> predicted by <span class="math inline">\(T\)</span>: <span class="math inline">\(||TB_T||^2 / ||U||^2\)</span>. If only one component is present, this ratio equals the squared correlation between <span class="math inline">\(T\)</span> and <span class="math inline">\(U\)</span>. Similarly we obtain summary measures for <span class="math inline">\(Y\)</span>.</li>
+<li>For assessing the predictive/explanatory power of the joint part of a subset of the observed variables, we can use the squared loadings as weights, as they sum up to one. The explained variation by the joint part is <span class="math inline">\(||TW_S^\top||^2/||X||^2\)</span> and for the predictive variation relative to <span class="math inline">\(U\)</span> we have <span class="math inline">\(||TBW_S^\top||^2/||U||^2\)</span> for a subset of indices <span class="math inline">\(S\subset \{1,\ldots,p\}\)</span>. For <span class="math inline">\(Y\)</span> similar formulas hold.</li>
+</ul>
+</div>
+<div id="visualizing" class="section level2">
+<h2>Visualizing</h2>
+<p>The OmicsPLS package provides a function for plotting the loadings in each component. It uses on the {ggplot2} package, but a basic plot is also available if {ggplot2} is not available. The full command for plotting loadings is</p>
+<pre><code>plot(x, loading_name, i, j, use_ggplot2, label, ...)</code></pre>
+<p>Here <code>x</code> is the only required object, namely the O2PLS fit. All other input parameters have a default value. The parameter <code>loading_name</code> represents which of the four parts (X-joint, Y-joint, X-specific or Y-specific) should be plotted and should be one of <code>&quot;Xjoint&quot;</code>, <code>&quot;Yjoint&quot;</code>, <code>&quot;Xorth&quot;</code> or <code>&quot;Yorth&quot;</code>. The strings may be abbreviated to e.g. <code>&quot;Xj&quot;</code> (instead of <code>&quot;Xjoint&quot;</code>) as long as there is no ambiguity. The positive integers <code>i</code> and <code>j</code> denote which components to plot against each other. For plotting component <span class="math inline">\(i\)</span> against its index, <code>j</code> can also be left unspecified. The <code>label</code> parameter can be one of two, either the index number if <code>label = &quot;number&quot;</code> or the variable names (if present in the data) if <code>label = &quot;colnames&quot;</code>. Also here the strings may be abbreviated to <code>&quot;n&quot;</code> and <code>&quot;c&quot;</code> respectively. Further arguments denoted by <code>...</code> will be processed by the plot function of {ggplot2}. Typically parameters like <code>col</code> (label color), <code>size</code> (label size), <code>alpha</code> (label transparancy) and/or <code>angle</code> (label angle) can be supplied here. The documentation of {ggplot2} contains much more information on this subject.</p>
+</div>
+</div>
+<div id="real-data-example" class="section level1">
+<h1>Real data example</h1>
+<div id="analysis-with-the-omicspls-package" class="section level2">
+<h2>Analysis with the OmicsPLS package</h2>
+<div id="fitting-1" class="section level3">
+<h3>Fitting</h3>
+<p>We select two joint, one transcript-specific and ten metabolite-specific components. We fit the O2PLS model with default values as follows.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">load</span>(<span class="st">&quot;rna_metab.RData&quot;</span>)
+<span class="kw">library</span>(OmicsPLS)</code></pre></div>
+<pre><code>## 
+## Attaching package: &#39;OmicsPLS&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:stats&#39;:
+## 
+##     loadings</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit =<span class="st"> </span><span class="kw">o2m</span>(rna, metab, <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">10</span>)
+fit</code></pre></div>
+<pre><code>## O2PLS fit 
+## with 2 joint components  
+## and  1 orthogonal components in X 
+## and  10 orthogonal components in Y 
+## Elapsed time: 2.32 sec</code></pre>
+<p>The total runtime of the fit was about 3 seconds. Note that univariate correlation tests would require almost one million tests to be performed, and does not take into account correlation between metabolites and genes. Also multivariate linear regression cannot deal with the large amount of variables.</p>
+<p>A summary of the results is obtained via</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(fit)</code></pre></div>
+<pre><code>## 
+## *** Summary of the O2PLS fit *** 
+## 
+## -  Call: o2m(X = rna, Y = metab, n = 2, nx = 1, ny = 10) 
+## 
+## -  Modeled variation
+## -- Total variation:
+## in X: 332035.7 
+## in Y: 68353.8 
+## 
+## -- Joint, Orthogonal and Noise as proportions:
+## 
+##            data X data Y
+## Joint       0.124  0.410
+## Orthogonal  0.171  0.242
+## Noise       0.705  0.348
+## 
+## -- Predictable variation in Y-joint part by X-joint part:
+## Variation in T*B_T relative to U: 0.15 
+## -- Predictable variation in X-joint part by Y-joint part:
+## Variation in U*B_U relative to T: 0.116 
+## 
+## -- Variances per component:
+## 
+##           Comp 1   Comp 2
+## X joint 24998.79 16206.10
+## Y joint 18486.88  9568.47
+## 
+##          Comp 1
+## X Orth 56765.75
+## 
+##          Comp 1 Comp 2   Comp 3   Comp 4   Comp 5   Comp 6  Comp 7  Comp 8
+## Y Orth 6632.482   3290 2053.118 1197.246 1095.368 1100.443 835.251 940.188
+##         Comp 9 Comp 10
+## Y Orth 569.562 811.094
+## 
+## 
+## -  Coefficient in &#39;U = T B_T + H_U&#39; model:
+## -- Diagonal elements of B_T =
+##  0.4 0.338</code></pre>
+<p>The joint, orthogonal and noise variations are shown as proportions. The two joint components explains about 12% of the transcriptomic variation and 41% of the metabolite variation, these proportions are 17% and 24% for the orthogonal part. We also observe that <em>relative to the variation in <span class="math inline">\(U\)</span></em>, the variation predicted by <span class="math inline">\(T\)</span> (or equivalently <span class="math inline">\(X\)</span>, transcripts) is 11.6%. Looking relative to the variation in <span class="math inline">\(Y\)</span> (metabolites), the variation predicted by <span class="math inline">\(T\)</span> (or equivalently <span class="math inline">\(X\)</span>) is <span class="math inline">\(0.116*0.41\)</span>. Similar calculations can be performed for the <span class="math inline">\(Y\)</span> part.</p>
+</div>
+<div id="plotting" class="section level3">
+<h3>Plotting</h3>
+<p><strong>Packages needed</strong></p>
+<ul>
+<li><code>install.packages(&quot;magrittr&quot;)</code></li>
+<li><code>install.packages(&quot;ggplot2&quot;)</code></li>
+<li><code>install.packages(&quot;gridExtra&quot;)</code></li>
+<li><code>install.packages(&quot;stringr&quot;)</code></li>
+<li><code>install.packages(&quot;gplots&quot;)</code></li>
+<li><code>install.packages(&quot;reshape2&quot;)</code></li>
+</ul>
+<p>We want to see which (groups of) metabolites and transcripts tend to correlate with each other. To do this we plot the loadings. The individual loading values per component indicate the relative importance of each variable to the corresponding component. We plot the two joint loadings against each other to see which metabolites are most important for each component. To do this we need three packages for convenience: <code>magrittr</code> for the piping operator, <code>ggplot2</code> for plotting and <code>gridExtra</code> to put multiple ggplots in one figure. Also <code>stringr</code> will be needed to extract substrings of column names. The <code>reshape2</code> package is needed for reshaping data sets from wide format to long format.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(magrittr)
+<span class="kw">library</span>(ggplot2)
+<span class="kw">library</span>(gridExtra)
+<span class="kw">library</span>(illuminaHumanv3.db)
+<span class="co"># Color names</span>
+LLmodule &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;ILMN_1690209&quot;</span>,<span class="st">&#39;ILMN_1766551&#39;</span>, <span class="st">&#39;ILMN_1749131&#39;</span>, <span class="st">&#39;ILMN_1688423&#39;</span>, 
+              <span class="st">&#39;ILMN_2102670&#39;</span>, <span class="st">&#39;ILMN_1792323&#39;</span>, <span class="st">&#39;ILMN_1899034&#39;</span>, <span class="st">&#39;ILMN_1806721&#39;</span>, 
+              <span class="st">&#39;ILMN_1695530&#39;</span>, <span class="st">&#39;ILMN_1726114&#39;</span>, <span class="st">&#39;ILMN_1751625&#39;</span>, <span class="st">&#39;ILMN_1726114&#39;</span>, 
+              <span class="st">&#39;ILMN_1753648&#39;</span>, <span class="st">&#39;ILMN_1779043&#39;</span>)
+LLnr &lt;-<span class="st"> </span><span class="kw">which</span>(<span class="kw">colnames</span>(rna) <span class="op">%in%</span><span class="st"> </span>LLmodule)
+rna_genenames &lt;-<span class="st"> </span><span class="kw">select</span>(illuminaHumanv3.db, 
+                        <span class="dt">keys =</span> <span class="kw">colnames</span>(rna)[LLnr], 
+                        <span class="dt">keytype =</span> <span class="st">&quot;PROBEID&quot;</span>, <span class="dt">columns =</span> <span class="st">&quot;SYMBOL&quot;</span>)[,<span class="dv">2</span>]
+
+name_col &lt;-<span class="st"> </span><span class="dv">1</span> <span class="op">+</span><span class="st"> </span><span class="kw">sapply</span>( <span class="co">#First sapply loops over column names</span>
+  <span class="dt">X =</span> <span class="kw">colnames</span>(metab),
+  <span class="dt">FUN =</span> <span class="cf">function</span>(arg){
+    <span class="kw">crossprod</span>(
+      <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>), <span class="co"># Weights to be used as categories</span>
+      <span class="kw">sapply</span>(<span class="kw">c</span>(<span class="st">&quot;VLDL&quot;</span>, <span class="st">&quot;LDL&quot;</span>, <span class="st">&quot;IDL&quot;</span>, <span class="st">&quot;HDL&quot;</span>,<span class="st">&quot;FA&quot;</span>), <span class="co"># metabolite classes</span>
+             <span class="cf">function</span>(arg2){<span class="kw">grepl</span>(arg2, arg)} <span class="co"># compare class of metabolites</span>
+      )
+    )
+    }
+  )
+name_col &lt;-<span class="st"> </span><span class="kw">factor</span>(name_col, 
+                   <span class="dt">levels =</span> <span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">4</span><span class="op">:</span><span class="dv">6</span>,<span class="dv">1</span>), 
+                   <span class="dt">labels =</span> <span class="kw">c</span>(<span class="st">&quot;VLDL&quot;</span>, <span class="st">&quot;LDL&quot;</span>, <span class="st">&quot;IDL&quot;</span>, <span class="st">&quot;HDL&quot;</span>,<span class="st">&quot;FA&quot;</span>,<span class="st">&quot;Other&quot;</span>))
+
+<span class="co"># alpmetab &lt;- loadings(fit, &quot;Yjoint&quot;, 1:2) %&gt;%  # Retreive loadings</span>
+<span class="co">#   abs %&gt;% # Absolute loading values for positive weights</span>
+<span class="co">#   rowSums %&gt;% # Sum over the components</span>
+<span class="co">#   sqrt + (name_col!=&quot;Other&quot;) # Take square root</span>
+
+######### Plot loadings with OmicsPLS plot method <span class="al">###</span>
+p_metab &lt;-<span class="st"> </span><span class="kw">plot</span>(fit, <span class="dt">loading_name=</span><span class="st">&quot;Yj&quot;</span>, <span class="dt">i=</span><span class="dv">1</span>, <span class="dt">j=</span><span class="dv">2</span>, <span class="dt">label=</span><span class="st">&quot;c&quot;</span>, <span class="co"># Plot the loadings</span>
+             <span class="dt">alpha=</span><span class="dv">0</span>) <span class="op">+</span><span class="st"> </span><span class="co"># set points to be 100% transparant</span>
+##################### Add all layers <span class="al">###</span>
+<span class="st">  </span><span class="kw">theme_bw</span>() <span class="op">+</span>
+<span class="st">  </span><span class="kw">coord_fixed</span>(<span class="dt">ratio =</span> <span class="dv">1</span>, <span class="dt">xlim=</span><span class="kw">c</span>(<span class="op">-</span>.<span class="dv">2</span>,.<span class="dv">2</span>),<span class="dt">ylim=</span><span class="kw">c</span>(<span class="op">-</span>.<span class="dv">2</span>,.<span class="dv">2</span>)) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_point</span>( <span class="co"># Set color and size</span>
+    <span class="kw">aes</span>(<span class="dt">col=</span>name_col, <span class="dt">size =</span> <span class="kw">I</span>(<span class="dv">1</span><span class="op">+</span>(name_col<span class="op">%in%</span><span class="kw">c</span>(<span class="st">&quot;VLDL&quot;</span>,<span class="st">&quot;HDL&quot;</span>))), 
+          <span class="dt">shape =</span> name_col),<span class="dt">show.legend =</span> T) <span class="op">+</span>
+<span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position=</span><span class="st">&quot;right&quot;</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">scale_color_discrete</span>(<span class="dt">name=</span><span class="st">&quot;Metabolite</span><span class="ch">\n</span><span class="st">Group&quot;</span>,
+                       <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;VLDL&quot;</span>, <span class="st">&quot;LDL&quot;</span>, <span class="st">&quot;IDL&quot;</span>, <span class="st">&quot;HDL&quot;</span>,<span class="st">&quot;FA&quot;</span>,<span class="st">&quot;Other&quot;</span>)) <span class="op">+</span>
+<span class="st">  </span><span class="kw">guides</span>(<span class="dt">size=</span>F) <span class="op">+</span><span class="st"> </span><span class="kw">scale_shape_discrete</span>(<span class="dt">name=</span><span class="st">&quot;Metabolite</span><span class="ch">\n</span><span class="st">Group&quot;</span>,
+                                <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;VLDL&quot;</span>, <span class="st">&quot;LDL&quot;</span>, <span class="st">&quot;IDL&quot;</span>, <span class="st">&quot;HDL&quot;</span>,<span class="st">&quot;FA&quot;</span>,<span class="st">&quot;Other&quot;</span>)) <span class="op">+</span>
+<span class="st">  </span><span class="kw">scale_shape_manual</span>(<span class="dt">name=</span><span class="st">&quot;Metabolite</span><span class="ch">\n</span><span class="st">Group&quot;</span>, <span class="dt">values=</span><span class="kw">c</span>(<span class="dv">15</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">17</span>,<span class="dv">5</span>,<span class="dv">6</span>)) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Metabolite joint loadings&quot;</span>,
+       <span class="dt">x =</span> <span class="st">&quot;First Joint Loadings&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;Second Joint Loadings&quot;</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">theme</span>(<span class="dt">plot.title =</span> <span class="kw">element_text</span>(<span class="dt">face=</span><span class="st">&#39;bold&#39;</span>),
+        <span class="dt">legend.title=</span><span class="kw">element_text</span>(<span class="dt">face=</span><span class="st">&#39;bold&#39;</span>)) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_hline</span>(<span class="dt">yintercept =</span> <span class="dv">0</span>) <span class="op">+</span><span class="st"> </span><span class="kw">geom_vline</span>(<span class="dt">xintercept =</span> <span class="dv">0</span>)
+
+alprna &lt;-<span class="st"> </span><span class="kw">loadings</span>(fit, <span class="st">&quot;Xjoint&quot;</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">raise_to_power</span>(<span class="dv">2</span>) <span class="op">%&gt;%</span><span class="st"> </span>rowSums
+alprna[<span class="op">-</span>(<span class="kw">order</span>(alprna,<span class="dt">decreasing=</span>T)[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>])] =<span class="st"> </span><span class="dv">0</span>
+alprna &lt;-<span class="st"> </span><span class="kw">sign</span>(alprna)
+toprna &lt;-<span class="st"> </span><span class="kw">which</span>(alprna<span class="op">&gt;</span><span class="dv">0</span>)
+names_rna &lt;-<span class="st"> </span><span class="kw">mapIds</span>(illuminaHumanv3.db, 
+       <span class="dt">keys =</span> <span class="kw">colnames</span>(rna)[toprna], 
+       <span class="dt">keytype =</span> <span class="st">&quot;PROBEID&quot;</span>, 
+       <span class="dt">column =</span> <span class="st">&quot;SYMBOL&quot;</span>,
+       <span class="dt">multiVals =</span> <span class="st">&#39;first&#39;</span>)
+names_rna[<span class="kw">which</span>(<span class="kw">is.na</span>(names_rna))] &lt;-<span class="st"> &quot;?&quot;</span>
+######### Plot loadings with OmicsPLS plot method <span class="al">###</span>
+p_rna &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="kw">data.frame</span>(<span class="dt">x =</span> fit<span class="op">$</span>W.[, <span class="dv">1</span>], <span class="dt">y =</span> fit<span class="op">$</span>W.[, <span class="dv">2</span>]), 
+                <span class="kw">aes</span>(<span class="dt">x =</span> x, <span class="dt">y =</span> y),
+                <span class="dt">alpha =</span> alprna,
+                <span class="kw">aes</span>(<span class="dt">label =</span> <span class="ot">NA</span>)) <span class="op">+</span>
+<span class="st">    </span>##################### Add all layers <span class="al">###</span>
+<span class="st">  </span><span class="kw">theme_bw</span>() <span class="op">+</span>
+<span class="st">  </span><span class="kw">coord_fixed</span>(.<span class="dv">8</span>, <span class="kw">c</span>(<span class="op">-</span>.<span class="dv">15</span>,.<span class="dv">15</span>),<span class="kw">c</span>(<span class="op">-</span>.<span class="dv">15</span>,.<span class="dv">15</span>)) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_point</span>(<span class="dt">alpha =</span> <span class="fl">0.5</span>, <span class="dt">col =</span> <span class="st">&#39;grey&#39;</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_point</span>(<span class="dt">data =</span> <span class="kw">data.frame</span>(<span class="dt">x=</span>fit<span class="op">$</span>W.[LLnr,<span class="dv">1</span>],<span class="dt">y=</span>fit<span class="op">$</span>W.[LLnr,<span class="dv">2</span>]),
+             <span class="dt">shape =</span> <span class="dv">2</span>, <span class="dt">col =</span> <span class="dv">2</span>, <span class="dt">size =</span> <span class="dv">2</span>) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_text</span>(<span class="dt">data =</span> <span class="kw">data.frame</span>(<span class="dt">x=</span>fit<span class="op">$</span>W.[toprna,<span class="dv">1</span>],<span class="dt">y=</span>fit<span class="op">$</span>W.[toprna,<span class="dv">2</span>]),
+            <span class="dt">hjust =</span> <span class="kw">rep</span>(<span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">0</span>), <span class="dt">length.out =</span> <span class="kw">length</span>(toprna)),
+            <span class="kw">aes</span>(<span class="dt">label =</span> names_rna)) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Transcript joint loadings&quot;</span>,
+       <span class="dt">x =</span> <span class="st">&quot;First Joint Loadings&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;Second Joint Loadings&quot;</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">theme</span>(<span class="dt">plot.title =</span> <span class="kw">element_text</span>(<span class="dt">face=</span><span class="st">&#39;bold&#39;</span>)) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_hline</span>(<span class="dt">yintercept =</span> <span class="dv">0</span>) <span class="op">+</span><span class="st"> </span><span class="kw">geom_vline</span>(<span class="dt">xintercept =</span> <span class="dv">0</span>)
+
+## Finally plot both plots in one figure.
+<span class="kw">grid.arrange</span>(p_metab, p_rna, <span class="dt">ncol=</span><span class="dv">2</span>)</code></pre></div>
+<p><img src="Figs/Loadings%20plot-1.png" width="3600" /> <!-- The genes with highest absolute loading values are most related with the metabolites having highest absolute loading values on the respective axes. It can be seen that especially VLDL metabolites cluster together in both axes, indicating that are correlated within both joint components. Moreover in the second component they tend to be negatively correlated to HDL metabolites. The VLDL metabolites are most correlated with expression of the *HDC* gene in the first component. In the second component the VLDL and HDL metabolites are most correlated with expression of genes involved in defense response and inflammation (e.g. *FCER1A*, *HDC* and *DEFA1*). --></p>
+</div>
+</div>
+<div id="exercises-1" class="section level2">
+<h2>Exercises</h2>
+<ul>
+<li>Describe in one paragraph the results of the O2PLS analysis performed on the <code>rna</code> and <code>metab</code> datasets. Think about
+<ul>
+<li>Top genes and their functionality (use google)</li>
+<li>Top metabolite clusters</li>
+<li>Which genes and clusters are related in which component</li>
+</ul></li>
+</ul>
+<div id="solutions-1" class="section level3">
+<h3>Solutions</h3>
+<ul>
+<li>The first component is interpreted as the VLDL component. The second component is more or less the HDL vs VLDL component. The corresponding genes in the second component seem to be involved in the immune system, especially HLA-DRB5 and DEFA1. This indicates that HDL vs VLDL concentrations are linked to immunology.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-Trygg2003">
+<p>Trygg, J., and S. Wold. 2003. “O2-Pls, a Two-Block (X-Y) Latent Variable Regression (Lvr) Method with an Integral Osc Filter.” <em>Journal of Chemometrics</em> 17 (1). John Wiley &amp; Sons, Ltd.: 53–64. doi:<a href="https://doi.org/10.1002/cem.775">10.1002/cem.775</a>.</p>
+</div>
+<div id="ref-Wold1973">
+<p>Wold, H. 1973. “Nonlinear Iterative Partial Least Squares (NIPALS) Modelling: Some Current Developments.” In <em>Multivariate Analysis, III (Proc. Third Internat. Sympos., Wright State Univ., Dayton, Ohio, 1972)</em>, 383–407. New York: Academic Press.</p>
+</div>
+</div>
+</div>
+
+    </div>
+    <div class="col-xs-2">
+        </div>
+  </div>
+  </div>
+  </div>
+  <div class="row">
+    </div>
+  </div>
+
+<script>
+$(document).ready(function () {
+  // add bootstrap table styles to pandoc tables
+  $('tr.header').parent('thead').parent('table').addClass('table table-striped table-hover');
+
+    var images = $('.pages img');
+  images.filter(function() {
+      if ($(this).parent().attr("class") == "figure") {
+          return(false)
+      } else {
+          return(true);
+      }
+  }).wrap("<div class='figure'></div>");
+  images.addClass("image-thumb").wrap("<div class='panel-body'></div>");
+  $('.figure p.caption').wrap("<div class='panel-footer'></div>");
+  $('.figure').addClass('panel panel-default');
+  
+    $('.pages img')
+ 	  .addClass("image-lb");
+  $('.pages').magnificPopup({
+	      type:'image',
+	      closeOnContentClick: false,
+	      closeBtnInside: false,
+        delegate: 'img',
+	      gallery: {enabled: false },
+          removalDelay: 500,
+          callbacks: {
+              beforeOpen: function() {
+                // just a hack that adds mfp-anim class to markup
+                this.st.image.markup = this.st.image.markup.replace('mfp-figure', 'mfp-figure mfp-with-anim');
+              }
+          },
+          mainClass: 'mfp-move-from-top',
+	      image: {
+	        verticalFit: true,
+            titleSrc: 'alt'
+	      }
+ 	    });
+ 	
+    
+    $('#toc ul li').first().addClass("active");
+    $('#toc ul li').attr("data-target", function() {
+        return($(this).children("a").attr("href"));
+    })
+    $('body .section.level1').first().addClass("active");
+    
+    $('#toc a[href*="#"]').click(function() {
+
+      var id = $(this).attr("href");
+      if (id === "#") return;
+      if (id.substring(0, 8) === "#dyntab-") return;
+      toggle_page(id);
+
+      // Menu
+      var menu_entry = $(".menu li[data-target='"+id+"']");
+      menu_entry.addClass("active");
+      $(".menu li").not(menu_entry).removeClass("active"); 
+      
+
+    });
+
+    function toggle_page(id) {
+      $(".page").not(page).removeClass("active").hide();
+      window.page = id;
+      var page = $(window.page);
+      window.location.hash = window.page;
+      //$(this).addClass("active");
+
+      page.show();
+
+      var totop = setInterval(function () {
+        $(".pages").animate({scrollTop: 0}, 0);
+      }, 10);
+
+      setTimeout(function () {
+        page.addClass("active");
+        setTimeout(function () {
+          clearInterval(totop);
+        }, 1000);
+      }, 100);
+
+      window.dispatchEvent(new Event('resize'));
+
+    }
+
+
+    $(".menu li").click(function () {
+
+      toggle_page($(this).data("target"));
+
+      // Menu
+      if (!$(this).data("target")) return;
+      if ($(this).is(".active")) return;
+      $(".menu li").not($(this)).removeClass("active");
+      $(this).addClass("active");
+
+    });
+  
+    
+
+
+    window.page = window.location.hash;
+    if (window.page != "") {
+      $(".menu").find("li[data-target=" + window.page + "]").trigger("click");
+    }
+
+    /* init material bootstrap js */
+    $.material.init();
+});
+</script>
+
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
