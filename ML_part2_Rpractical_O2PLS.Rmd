@@ -19,7 +19,7 @@ opts_chunk$set(fig.path='Figs/', eval=TRUE,
 
 # Introduction
 
-This is a file with exercises for the ML 2010 course. The exercises are divided in two parts. This is part 2: Two-way Orthogonal Partial Least Squares. 
+This is a file with exercises for the ML 2020 course. The exercises are divided into two parts. This is part 2: Two-way Orthogonal Partial Least Squares. 
 
 ## The OmicsPLS R package
 
@@ -58,26 +58,23 @@ Ideally the number of components $(n, n_X, n_Y)$ are known beforehand. If not th
 
 In cross-validation (CV) one minimizes a certain measure of error over some parameters that should be known a priori. In our case we have three parameters to determine a priori: $(n, n_X, n_Y)$. A popular measure is the prediction error $||\hat{Y} - Y||$, where $\hat{Y}$ is a prediction of $Y$. However the O2PLS method is symmetric in $X$ and $Y$, so we minimize the sum of the prediction errors: $||\hat{X} - X||+||\hat{Y} - Y||$. The idea is to fit O2PLS to our data $X$ and $Y$ and compute the prediction errors for a grid of values for $n$, $n_X$ and $n_Y$. Here $n$ should be a positive integer, and $n_X$ and $n_Y$ should be non-negative. The `best' integers are then the minimizers of the prediction error. 
 
-## Exercises
+# Exercises
 
-- Easy exercises
-    - Write down the expression for $X^\top X$, $Y^\top Y$ and $ $X^\top Y$ in terms of $T$, $U$, etc, where $X$ and $Y$ follow the O2PLS model
+- Normal exercises
+    - What is the interpretation of $W$ in PLS (and O2PLS)? In particular, the interpretation of $w_{i,j}$?
     - In some contexts, PLS and O2PLS are viewed as regression models. What is the regression function of $Y$ in terms of $X$, i.e. how is the matrix $A$ given in $Y = X A + \tilde{E}$? 
-- Difficult exercises
+- Advanced exercises
     - Describe, in terms of the model, situations where  the PLS and O2PLS loadings and scores will differ
-    - Try to sketch how to simultaneuosly optimize the O2PLS weights, i.e. give a suitable objective function with constraints and propose a strategy to optimize this function
 
-### Solutions
+# Solutions
 
-- Easy exercises
-    - First, $X^\top X = W T^\top T W^\top  + P_{Y\perp} T^\top_{Y\perp} T_{Y\perp} P_{Y\perp}^\top$. Second, $X^\top Y = W T^\top B U C^\top$. Last, $Y^\top Y = C B^\top T^\top T B C^\top  + P_{X\perp} U^\top_{X\perp} U_{X\perp} P_{X\perp}^\top$.
+- Normal exercises
+    - $W$ is the loading matrix for the X-joint part. Each column in $W$ is a weight vector. These weights indicate the importance of each feature in $X$ for the relation with $Y$. The number $w_{i,j}$ indicates the weight/importance of feature $i$ in the $j$'th component.
     - $A = WBC^\top$
-- Difficult exercises
+- Advanced exercises
     - When there is a specific component with a weak correlation between $X$ and $Y$, but a large variance, this component will be captured in the PLS joint component. This is because the product of variance and correlation is covariance, and this will be high. O2PLS will, usually, filter this away. Moreover, even if the PLS and O2PLS joint loadings are similar, the PLS scores will contain specific variation, which will dilute the true relation between $X$ and $Y$.
-    - One should optimize w.r.t. all loadings at the same time. A gradient ascent algorithm might be of use here. 
 
-
-# Main functions (to be skipped)
+# Main functions (can be skipped)
 
 ## Brief overview
 
@@ -172,7 +169,7 @@ A summary of the results is obtained via
 ```{r Summary of the fit}
 summary(fit)
 ```
-The joint, orthogonal and noise variations are shown as proportions. The two joint components explains about 12\% of the transcriptomic variation and 41\% of the metabolite variation, these proportions are 17\% and 24\% for the orthogonal part. We also observe that *relative to the variation in $U$*, the variation predicted by $T$ (or equivalently $X$, transcripts) is 11.6\%. Looking relative to the variation in $Y$ (metabolites), the variation predicted by $T$ (or equivalently $X$) is $0.116*0.41$. Similar calculations can be performed for the $Y$ part.
+The amount of variation in the joint, orthogonal and noise parts are shown as proportions. The two joint components explain about 12\% of the transcriptomic variation and 41\% of the metabolite variation, these proportions are 17\% and 24\% for the orthogonal part. We also observe that *relative to the variation in $U$*, the variation predicted by $T$ (or equivalently $X$, transcripts) is 11.6\%. Looking relative to the variation in $Y$ (metabolites), the variation predicted by $T$ (or equivalently $X$) is $0.116*0.41$. Similar calculations can be performed for the $Y$ part.
 
 ### Plotting
 
@@ -277,16 +274,18 @@ grid.arrange(p_metab, p_rna, ncol=2)
 ```
 <!-- The genes with highest absolute loading values are most related with the metabolites having highest absolute loading values on the respective axes. It can be seen that especially VLDL metabolites cluster together in both axes, indicating that are correlated within both joint components. Moreover in the second component they tend to be negatively correlated to HDL metabolites. The VLDL metabolites are most correlated with expression of the *HDC* gene in the first component. In the second component the VLDL and HDL metabolites are most correlated with expression of genes involved in defense response and inflammation (e.g. *FCER1A*, *HDC* and *DEFA1*). -->
 
-## Exercises
+# Exercises
 
+- Is the LL module among the top genes?
 - Describe in one paragraph the results of the O2PLS analysis performed on the `rna` and `metab` datasets. Think about
     - Top genes and their functionality (use google)
     - Top metabolite clusters
     - Which genes and clusters are related in which component
 
 
-### Solutions
+# Solutions
 
+- Yes, partly. 
 - The first component is interpreted as the VLDL component. The second component is more or less the HDL vs VLDL component. The corresponding genes in the second component seem to be involved in the immune system, especially HLA-DRB5 and DEFA1. This indicates that HDL vs VLDL concentrations are linked to immunology.
 
 

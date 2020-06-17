@@ -1,5 +1,5 @@
 ---
-title: "ML course - Part 1 - PCA"
+title: "ML course - Part 1a - PCA"
 author: "Said el Bouhaddani"
 date: '`r Sys.Date()`'
 output:
@@ -19,7 +19,7 @@ opts_chunk$set(fig.path='Figs/', eval=TRUE,
 
 # Introduction
 
-This is a file with exercises for the ML 2020 course. The exercises are divided in two parts. This is part 1: Principal components analysis. 
+This is a file with exercises for the ML 2020 course. The exercises are divided into two parts. This is part 1a: Principal components analysis. 
 
 ## PCA recap
 As discussed in the lecture, the PCA solution for finding $w$ that maximizes the variance of the projected data matrix $Xw$ is the first right singular vector of $X$. Further directions of maximal variance are given by the subsequent singular vectors. We typically collect all of these vectors in a matrix $W$. The scores are given by $T=XW$, one per column. Based on these two matrices, we can approximate $X$ by $TW^\top$ (which is nothing more than the projection of $X$ onto $WW^\top$).
@@ -30,43 +30,37 @@ As discussed in the lecture, the PCA solution for finding $w$ that maximizes the
 - Matrices can be subsetted with the `[` operator, e.g. `A$vectors[,1]`.
 - The scores can be obtained by multiplying $X$ and $W$, e.g. `T = X %*% W`.
 
-## Exercises
+# Exercises
 
 - Normal exercises
-    - Show that $TW^\top$ is "nothing more than" $XWW^\top$
+    - Show that $TW^\top$ is "nothing more than" $XWW^\top$ 
     - Simulate two vectors `x1 = rnorm(100)` and `x2 = rnorm(100)`. Apply PCA and inspect the weights of the data matrix `X = cbind(x1, x2)`. Recall, the weights are given by `svd(X,0)$v`.
-    - Now introduce correlation, for example by running `x2 = x1 + rnorm(100, sd = 0.1*sd(x1))`. Now run the PCA decomposition again and inspect the weights. 
+    - Now introduce correlation, for example by running `x2 = x1 + rnorm(100, sd = 0.1)`. Now run the PCA decomposition again and inspect the weights. 
         - How does correlation affect the weights?
-- Advanced exercises, you can safely skip it for now
-    - What is wrong with the following optimization problem: $\max_w w^\top X^\top X w$ (with $w$ unrestricted)
-    - Formulate the optimization problem for finding the second direction $w_2$ given the first direction $w_1$
+- Advanced exercises
+    - What is wrong with the following optimization problem: $\max_w w^\top X^\top X w$ (with $w$ unrestricted)? What is the largest possible covariance we can obtain?
+    - Formulate the optimization problem for finding the second direction $w_2$ given the first direction $w_1$. Hint, $w_2$ should be orthogonal to $w_1$.
 
-### Solutions
-- Easy exercises
+# Solutions
+- Normal exercises
     - Note that by definition, $T = XW$, therefore $TW^\top = XWW^\top$.
-    - The weights should be random for each run, as it totally depends on the variances of the columns. PS don't forget the transpose product $X^\top X$ in `eigen(t(X) %*% X)`.
-    - If the variables are correlated, the weights are much more stable. They should be around $1/sqrt(2)$. 
+    - The weights should be random for each run, as it totally depends on the variances of the columns. 
+    - If the variables are correlated, the weights are much more stable. They should be around $\sqrt{0.5}$. 
 - More difficult exercises, you can safely skip it for now
-    - This requires some special matrix manipulation skills. First, expand the squares to get 
-    $$ ||X-Xww^\top||^2_F = \mathrm{tr}(X^\top X) - 2\mathrm{tr}(X^\top X ww^\top) +  \mathrm{tr}(ww^\top X^\top X ww^\top).$$
-    The constant term $X^\top X$ can be dropped. Within the trace, objects can be rotated to get $-2 w^\top X^\top X w + w^\top w w^\top X^\top X w$. Due to the constraints, the final optimization problem is 
-    $$ \min_w -2 w^\top X^\top X w + w^\top w w^\top X^\top X w = \max_w w^\top X^\top X w $$, which is the original PCA formulation.
-    Regarding the second formulation: 
-    $$ ||X^\top X - cww^\top ||^2_f = -2c \mathrm{tr}(X^\top X ww^\top) + c^2 \mathrm{tr}(ww^\top ww^\top) $$. Again, rotate within the trace and apply the constraint on $w$ yields something negatively proportional to $ w^\top X^\top X w $.
-    - This is discussed in the lecture. Choose $w$ is infinity and the maximum is not defined. Hence, the optimization problem does not admit a solution.
-    - It is solving $\max_w w^\top X^\top X w$ s.t. $w^\top w = 1$ and $w^\top w_1 = 0$
+    - Let $w$ go to infinity, then the covariance gets larger and larger. Hence, the optimization problem does not admit a solution. 
+    - It is $\max_w w^\top X^\top X w$ s.t. $w^\top w = 1$ and $w^\top w_1 = 0$
 
-# Load real data 
+# Data analysis with Principal Components Analysis
 
-We start with transcriptomic and metabolomic measurements from a Finnish population cohort, as part of the DILGOM study. The transcriptomic measurements can be found at ArrayExpress (http://www.ebi.ac.uk/arrayexpress/) under accession number `E-TABM-1036` (`E-TABM-1036.processed.1.zip`). The metabolite measurements are attached as supplemental material at [@Inouye2010msb] (`msb201093-sup-0002.zip`). These data are already prepared and on Github, so download the file "rna_metab.RData".
+We have transcriptomic and metabolomic measurements from a Finnish population cohort, as part of the DILGOM study. The transcriptomic measurements can be found at ArrayExpress (http://www.ebi.ac.uk/arrayexpress/) under accession number `E-TABM-1036` (`E-TABM-1036.processed.1.zip`). The metabolite measurements are attached as supplemental material at [@Inouye2010msb] (`msb201093-sup-0002.zip`). These data are already prepared and on Github, so download the file `rna_metab.RData`.
 
 ## Load the data
 
-Now we download the data and prepare it in the right format (samples as rows and genes as columns) and give the rows and columns the right names. Note that this code chunk automatically downloads and loads the transcriptomic data into memory.
+This code chunk loads the transcriptomic data into memory.
 ```{r Load RNA data}
 load("rna_metab.RData")
 ```
-There are two datasets in your environment: `rna` (transcripts) and `metab` (metabolites).
+There are two datasets in your environment: `rna` (transcripts) and `metab` (metabolites). Check with `ls()`.
 
 ## Inspect the data: descriptives
 
@@ -74,14 +68,13 @@ There are two datasets in your environment: `rna` (transcripts) and `metab` (met
 
 * `install.packages("gplots")`
 
-A heatmap of metabolites, before and after imputation is plotted.
+A heatmap of metabolites is plotted. There are some groups of correlated variables it seems.
 ```{r Heatmap of correlations, out.width='8cm', out.height='6cm', fig.show='hold'}
 gplots::heatmap.2(cor(metab,use = 'pair'), dendrogram='none', Rowv=F, Colv=F,trace='n',
                   breaks=seq(-1,1,length.out = 25), col=gplots::bluered)
 ```
-They are almost the same, indicating that the correlation structure within metabolites hasn't changed much.
 
-Boxplots provide a good summary to compare the distribution of the variables relative to each other. Properties such as comparable means, variances and symmetry are often good to have. To reduce the number of boxplots we filter the transcriptomic data to include genes with 95\% highest expression and IQR.
+Boxplots provide a good summary to compare the distribution of the variables relative to each other. Properties such as comparable means, variances and symmetry are often good to have. For sake of visualisation, we only consider the first 100 transcripts.
 ```{r Boxplots, out.width='8cm', out.height='6cm', fig.show='hold'}
 par(mfrow=c(2,1))
 boxplot(rna[,1:100])
@@ -90,11 +83,9 @@ par(mfrow=c(1,1))
 ```
 The distributions are quite symmetric and the scale is comparable across variables in each data set.
 
-# Analysis with Principal Components Analysis
-
 ## Run PCA on the data
 
-For sake of computation time, we will introduce another way to calculate principal components. Instead of calculating eigenvectors of $X^\top X$, we will calculate *right singular vectors* of $X$. In R, this can be done by running `svd(X, nu=0, nv=1)`, where `nu` and `nv` represent the number of left and right singular vectors, respectively. The output is a list with three elements: `d` the *singular values*, `u` the left singular vectors, and `v` the right singular vectors and eigenvectors of $X^\top X$. 
+We perform PCA by calculating the SVD. Note that this is much faster than running `eigen` on the matrix $X^\top X$, which is 7385 times 7385. 
 
 ```{r PCA fit}
 pca.rna = svd(rna, 0, 2)
@@ -106,15 +97,16 @@ plot(metab %*% pca.metab$v, main = "Metabolites PCA plot of the scores",xlab=NA,
 par(mfrow=c(1,1))
 ```
 
+No particular structure or outliers are visible.
 
 Now to plot the weights for the two directions. Note that the RNA dataset has around 7000 weights to plot. For the metabolite weights, we add a coloring based on the type of metabolite.
 
-```{r plot loadings}
+```{r plot loadings, warning=F, message=F}
 library(magrittr)
 library(ggplot2)
 library(gridExtra)
 library(OmicsPLS)
-library(illuminaHumanv3.db)
+library(illuminaHumanv3.db) # BiocManager::install("illuminaHumanv3.db")
 # Color names
 LLmodule <- c("ILMN_1690209",'ILMN_1766551', 'ILMN_1749131', 'ILMN_1688423', 
               'ILMN_2102670', 'ILMN_1792323', 'ILMN_1899034', 'ILMN_1806721', 
@@ -199,19 +191,22 @@ grid.arrange(p_metab, p_rna, ncol=2)
 
 ```
 
-## Exercises
+# Exercises
 
-- Why is it better to derive singular vectors fro $X$ than eigenvectors from $X^\top X$, where $X$ is the `rna` dataset?
-- Identify the most extreme expression probe with `identify()`. To this end, first run `plot(pca.rna$v)`.
+- Why is it better to derive singular vectors from $X$ than eigenvectors from $X^\top X$, where $X$ is the `rna` dataset?
+- Identify the most extreme expression probe with `identify`. To this end, first run `plot(pca.rna$v)`.
     - To which gene does it map? Tip: use google. 
     - Why does it have the largest weight? 
-- What kind of clusters appear in the metabolite weights?
+- What kind of clusters appear in the metabolite weights? 
+- From previous analysis, it was shown that the LL module seemed to be connected to lipid metabolism. The genes in the LL module are shown as red triangles. Are they among the top genes?
 
-### Solutions
+# Solutions
 
 - Here, `t(rna) %*% rna` is a `r ncol(rna)` by `r ncol(rna)` matrix. This does probably not fit into memory. Furthermore, with `eigen` you cannot limit the number of PC's to be calculated.
 - Run `identify(pca.rna$v, labels = colnames(rna))` and click on the most extreme values. Then click ESC. It is the second gene in the dataset. When inspecting the boxplots of the first 10 genes, it appears that this gene has a higher variance.
 - Roughly speaking: VLDL and HDL. 
+- No. Because PCA does not look at the relation between `rna` and `metab`.
+
 
 
 # References
