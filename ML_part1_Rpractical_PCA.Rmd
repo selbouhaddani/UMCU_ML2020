@@ -1,12 +1,14 @@
 ---
-title: "ML course - Part 1a - PCA"
+title: "ML course - Part 1 - PCA"
 author: "Said el Bouhaddani"
 date: '`r Sys.Date()`'
 output:
   rmdformats::material:
-    highlight: kate
-    self_contained: no
-bibliography: references.bib
+    highlight: tango
+    fig_width: 9
+    fig_height: 7
+    self_contained: yes
+bibliography: library.bib
 ---
 
 ```{r global_options, include=FALSE}
@@ -19,14 +21,14 @@ opts_chunk$set(fig.path='Figs/', eval=TRUE,
 
 # Introduction
 
-This is a file with exercises for the ML 2020 course. The exercises are divided into two parts. This is part 1a: Principal components analysis. 
+This is a file with exercises for the ML 2020 course. The exercises are divided into two parts. This is part 1: Principal components analysis. 
 
 ## PCA recap
 As discussed in the lecture, the PCA solution for finding $w$ that maximizes the variance of the projected data matrix $Xw$ is the first right singular vector of $X$. Further directions of maximal variance are given by the subsequent singular vectors. We typically collect all of these vectors in a matrix $W$. The scores are given by $T=XW$, one per column. Based on these two matrices, we can approximate $X$ by $TW^\top$ (which is nothing more than the projection of $X$ onto $WW^\top$).
 
 ## Quick tips
 
-- To obtain the right singular vectors of a matrix $A$, one can use `svd(A,nu=0)`. The output is a list with elements `d` and `v`. The `v` contain the singular vectors. These elements can be accessed with the `$` key. 
+- To obtain the first two right singular vectors of a matrix $A$, one can use `svd(A,nu=0,nv=2)`. The output is a list with elements `d` and `v`. The `v` contain the singular vectors. These elements can be accessed with the `$` key. 
 - Matrices can be subsetted with the `[` operator, e.g. `A$vectors[,1]`.
 - The scores can be obtained by multiplying $X$ and $W$, e.g. `T = X %*% W`.
 
@@ -34,10 +36,10 @@ As discussed in the lecture, the PCA solution for finding $w$ that maximizes the
 
 - Normal exercises
     - Show that $TW^\top$ is "nothing more than" $XWW^\top$ 
-    - Simulate two vectors `x1 = rnorm(100)` and `x2 = rnorm(100)`. Apply PCA and inspect the weights of the data matrix `X = cbind(x1, x2)`. Recall, the weights are given by `svd(X,0)$v`.
+    - Simulate two vectors `x1 = rnorm(100)` and `x2 = rnorm(100)`. Apply PCA and inspect the weights of the data matrix `X = cbind(x1, x2)`. Recall, the weights of the first component are given by `svd(X,0,1)$v`.
     - Now introduce correlation, for example by running `x2 = x1 + rnorm(100, sd = 0.1)`. Now run the PCA decomposition again and inspect the weights. 
         - How does correlation affect the weights?
-- Advanced exercises
+- Advanced exercises (may be skipped for sake of time)
     - What is wrong with the following optimization problem: $\max_w w^\top X^\top X w$ (with $w$ unrestricted)? What is the largest possible covariance we can obtain?
     - Formulate the optimization problem for finding the second direction $w_2$ given the first direction $w_1$. Hint, $w_2$ should be orthogonal to $w_1$.
 
@@ -52,11 +54,11 @@ As discussed in the lecture, the PCA solution for finding $w$ that maximizes the
 
 # Data analysis with Principal Components Analysis
 
-We have transcriptomic and metabolomic measurements from a Finnish population cohort, as part of the DILGOM study. The transcriptomic measurements can be found at ArrayExpress (http://www.ebi.ac.uk/arrayexpress/) under accession number `E-TABM-1036` (`E-TABM-1036.processed.1.zip`). The metabolite measurements are attached as supplemental material at [@Inouye2010msb] (`msb201093-sup-0002.zip`). These data are already prepared and on Github, so download the file `rna_metab.RData`.
+We have transcriptomic and metabolomic measurements from a Finnish population cohort, as part of the DILGOM study. The transcriptomic measurements can be found at ArrayExpress (http://www.ebi.ac.uk/arrayexpress/) under accession number `E-TABM-1036` (`E-TABM-1036.processed.1.zip`). The metabolite measurements are attached as supplemental material at [@Inouye2010a] (`msb201093-sup-0002.zip`). These data are already prepared and on Github, so download the file `rna_metab.RData` from the following link: https://github.com/selbouhaddani/UMCU_ML2020/blob/master/rna_metab.RData
 
 ## Load the data
 
-This code chunk loads the transcriptomic data into memory.
+This code chunk loads the transcriptomic and metabolomic data into memory.
 ```{r Load RNA data}
 load("rna_metab.RData")
 ```
@@ -69,18 +71,19 @@ There are two datasets in your environment: `rna` (transcripts) and `metab` (met
 * `install.packages("gplots")`
 
 A heatmap of metabolites is plotted. There are some groups of correlated variables it seems.
-```{r Heatmap of correlations, out.width='8cm', out.height='6cm', fig.show='hold'}
+```{r Heatmap of correlations}
 gplots::heatmap.2(cor(metab,use = 'pair'), dendrogram='none', Rowv=F, Colv=F,trace='n',
                   breaks=seq(-1,1,length.out = 25), col=gplots::bluered)
 ```
 
 Boxplots provide a good summary to compare the distribution of the variables relative to each other. Properties such as comparable means, variances and symmetry are often good to have. For sake of visualisation, we only consider the first 100 transcripts.
-```{r Boxplots, out.width='8cm', out.height='6cm', fig.show='hold'}
+```{r Boxplots}
 par(mfrow=c(2,1))
 boxplot(rna[,1:100])
 boxplot(metab)
 par(mfrow=c(1,1))
 ```
+
 The distributions are quite symmetric and the scale is comparable across variables in each data set.
 
 ## Run PCA on the data
@@ -203,7 +206,7 @@ grid.arrange(p_metab, p_rna, ncol=2)
 # Solutions
 
 - Here, `t(rna) %*% rna` is a `r ncol(rna)` by `r ncol(rna)` matrix. This does probably not fit into memory. Furthermore, with `eigen` you cannot limit the number of PC's to be calculated.
-- Run `identify(pca.rna$v, labels = colnames(rna))` and click on the most extreme values. Then click ESC. It is the second gene in the dataset. When inspecting the boxplots of the first 10 genes, it appears that this gene has a higher variance.
+- Run `identify(pca.rna$v, labels = colnames(rna))` and click on the most extreme values. Then click ESC. It is the second transcript in the dataset. When inspecting the boxplots of the first 10 genes, it appears that this gene has a high variance.
 - Roughly speaking: VLDL and HDL. 
 - No. Because PCA does not look at the relation between `rna` and `metab`.
 

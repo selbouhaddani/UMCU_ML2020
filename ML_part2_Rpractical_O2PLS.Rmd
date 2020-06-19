@@ -1,12 +1,14 @@
 ---
-title: "ML course - Part 2 - O2PLS"
+title: "ML course - Part 2 - PLS + O2PLS"
 author: "Said el Bouhaddani"
 date: '`r Sys.Date()`'
 output:
   rmdformats::material:
-    highlight: kate
-    self_contained: no
-bibliography: references.bib
+    highlight: tango
+    fig_width: 9
+    fig_height: 7
+    self_contained: yes
+bibliography: library.bib
 ---
 
 ```{r global_options, include=FALSE}
@@ -19,11 +21,11 @@ opts_chunk$set(fig.path='Figs/', eval=TRUE,
 
 # Introduction
 
-This is a file with exercises for the ML 2020 course. The exercises are divided into two parts. This is part 2: Two-way Orthogonal Partial Least Squares. 
+This is a file with exercises for the ML 2020 course. The exercises are divided into two parts. This is part 2: (Two-way Orthogonal) Partial Least Squares. 
 
 ## The OmicsPLS R package
 
-The O2PLS method is implemented in the OmicsPLS package. 
+The O2PLS method is implemented in the OmicsPLS package [@Bouhaddani2018b]. 
 After installing, help is found with the `?` operator. Try to type `?OmicsPLS` for an overview of the package and `?o2m` for description of the main fitting function.
 
 ## Installing and loading
@@ -61,17 +63,19 @@ In cross-validation (CV) one minimizes a certain measure of error over some para
 # Exercises
 
 - Normal exercises
+    - Which method is equivalent to applying PLS to two datasets $X$ and $X$ (i.e. the same data)?
     - What is the interpretation of $W$ in PLS (and O2PLS)? In particular, the interpretation of $w_{i,j}$?
-    - In some contexts, PLS and O2PLS are viewed as regression models. What is the regression function of $Y$ in terms of $X$, i.e. how is the matrix $A$ given in $Y = X A + \tilde{E}$? 
 - Advanced exercises
-    - Describe, in terms of the model, situations where  the PLS and O2PLS loadings and scores will differ
+    - In some contexts, PLS and O2PLS are viewed as regression models. What is the regression function of $Y$ in terms of $X$, i.e. how is the matrix $A$ given in $Y = X A + \tilde{E}$? 
+    - Describe, in terms of the model, situations where the PLS and O2PLS loadings and scores will differ
 
 # Solutions
 
 - Normal exercises
+    - PCA, since the covariance is then the variance $X^\top X$. 
     - $W$ is the loading matrix for the X-joint part. Each column in $W$ is a weight vector. These weights indicate the importance of each feature in $X$ for the relation with $Y$. The number $w_{i,j}$ indicates the weight/importance of feature $i$ in the $j$'th component.
     - $A = WBC^\top$
-- Advanced exercises
+- Advanced exercises (may be skipped for sake of time)
     - When there is a specific component with a weak correlation between $X$ and $Y$, but a large variance, this component will be captured in the PLS joint component. This is because the product of variance and correlation is covariance, and this will be high. O2PLS will, usually, filter this away. Moreover, even if the PLS and O2PLS joint loadings are similar, the PLS scores will contain specific variation, which will dilute the true relation between $X$ and $Y$.
 
 # Main functions (can be skipped)
@@ -153,8 +157,7 @@ Further arguments denoted by `...` will be processed by the plot function of {gg
 
 ## Analysis with the OmicsPLS package
 
-### Fitting
-
+We consider again transcriptomic and metabolomic data from the DILGOM study. 
 We select two joint, one transcript-specific and ten metabolite-specific components. We fit the O2PLS model with default values as follows.
 ```{r Fit O2PLS}
 load("rna_metab.RData")
@@ -163,7 +166,7 @@ fit = o2m(rna, metab, 2, 1, 10)
 fit
 ```
 
-The total runtime of the fit was about 3 seconds. Note that univariate correlation tests would require almost one million tests to be performed, and does not take into account correlation between metabolites and genes. Also multivariate linear regression cannot deal with the large amount of variables.
+The total run-time of the fit was about 3 seconds. Note that univariate correlation tests would require almost one million tests to be performed, and does not take into account correlation between metabolites and genes. Also multivariate linear regression cannot deal with the large amount of variables.
 
 A summary of the results is obtained via
 ```{r Summary of the fit}
@@ -276,7 +279,8 @@ grid.arrange(p_metab, p_rna, ncol=2)
 
 # Exercises
 
-- Is the LL module among the top genes?
+- First verify that fitting PLS with `o2m(rna,metab,2,0,0)` is the same as fitting PLS with `svd(crossprod(metab,rna),2,2)`. Take the metabolomic loading matrix from both fits, e.g. by adding `$C.` and `$u`, respectively. Then take the squared difference by calculating, e.g. `ssq(C. - u)`. 
+- Regarding the plot: Is the LL module among the top genes?
 - Describe in one paragraph the results of the O2PLS analysis performed on the `rna` and `metab` datasets. Think about
     - Top genes and their functionality (use google)
     - Top metabolite clusters
@@ -285,6 +289,7 @@ grid.arrange(p_metab, p_rna, ncol=2)
 
 # Solutions
 
+- Run `ssq(svd(crossprod(metab,rna),2,2)$u- o2m(rna,metab,2,0,0)$C.)`. The difference should be 0 or around `1e-15`. 
 - Yes, partly. 
 - The first component is interpreted as the VLDL component. The second component is more or less the HDL vs VLDL component. The corresponding genes in the second component seem to be involved in the immune system, especially HLA-DRB5 and DEFA1. This indicates that HDL vs VLDL concentrations are linked to immunology.
 
